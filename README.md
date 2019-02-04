@@ -1,10 +1,11 @@
 # AFLSmart: Smart Greybox Fuzzing
+AFLSmart is a smart (input-structure aware) greybox fuzzer which leverages a high-level structural representation of the seed files to generate new files. It uses higher-order mutation operators that work on the virtual file structure rather than on the bit level which allows AFLSmart to explore completely new input domains while maintaining file validity. It uses a novel validity-based power schedule that enables AFLSmart to spend more time generating files that are more likely to pass the parsing stage of the program, which can expose vulnerabilities much deeper in the processing logic.
 
-AFLSmart is an extension of [AFL](http://lcamtuf.coredump.cx/afl/) from Michał Zalewski. It makes AFL input-structure aware by taking in high-level structural representation of seed files. It combines AFL with Peach input model/grammar definitions. We thank Peach Tech for making [Peach Community version](http://www.peach.tech/resources/peachcommunity/) open source. 
+AFLSmart is an extension of [American Fuzzy Lop]() written and maintained by Michal Zalewski <<lcamtuf@google.com>>, and builds upon the [Peach Fuzzer Community Edition](http://www.peach.tech/resources/peachcommunity/) written and maintained by [PeachTech](https://www.peach.tech/). We thank PeachTech for making the community version open source.
 
-The work was done by [Van-Thuan Pham](https://thuanpv.github.io/), [Marcel Böhme](https://mboehme.github.io/), Andrew E. Santosa, Alexandru Răzvan Căciulescu, and [Abhik Roychoudhury](https://www.comp.nus.edu.sg/~abhik/).
+Smart Greybox Fuzzing was developed by [Van-Thuan Pham](https://thuanpv.github.io/), [Marcel Böhme](https://mboehme.github.io/), Andrew E. Santosa, Alexandru Răzvan Căciulescu, and [Abhik Roychoudhury](https://www.comp.nus.edu.sg/~abhik/).
 
-For more details, please checkout our preprint: [Smart Greybox Fuzzing](https://arxiv.org/pdf/1811.09447.pdf). The original README file of AFL is [docs/README](https://github.com/aflsmart/aflsmart/blob/master/docs/README).
+For more details, please checkout our preprint: [Smart Greybox Fuzzing](https://arxiv.org/pdf/1811.09447.pdf). For details on American Fuzzy Lop, we refer to [docs/README](https://github.com/aflsmart/aflsmart/blob/master/docs/README).
 
 # Installation
 
@@ -121,3 +122,8 @@ We would love to hear from you if you have found interesting vulnerabilities wit
 ## Contributions
 
 All contributions are welcome. We would love to get your pull requests for bug fixes, improvements and new input models. We have provided 10 Peach pits for popular file fomrats (e.g., PDF, PNG, AVI ...) and will try to gradually upload more to the repository but there are hundreds of file formats out there and it would be great if AFLSmart's users could contribute their models.
+
+## Licences
+AFLSmart is an extension of [American Fuzzy Lop](http://lcamtuf.coredump.cx/afl/) written and maintained by Michal Zalewski <<lcamtuf@google.com>>, and builds upon the [Peach Fuzzer Community Edition](http://www.peach.tech/resources/peachcommunity/) written and maintained by [PeachTech](https://www.peach.tech/). We thank PeachTech for making the community version open source.
+* **AFL**: [Copyright](https://github.com/aflsmart/aflsmart/blob/master/docs/README) 2013, 2014, 2015, 2016 Google Inc. All rights reserved. Released under terms and conditions of [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
+* **Peach**: Peach is *not* distributed with this repository. Instead, we ask to download [here](https://sourceforge.net/projects/peachfuzz/files/Peach/3.0/). The Peach Fuzzer Community Edition is [licenced](http://community.peachfuzzer.com/License.html) under the [MIT License](http://en.wikipedia.org/wiki/Mit_license)
