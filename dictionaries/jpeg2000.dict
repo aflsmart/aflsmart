@@ -1,0 +1,33 @@
+#
+# AFL dictionary for JPEG 2000 images
+# ------------------------------
+#
+# Created by AFLSmart's authors
+#
+
+header_jP="jP  "
+header_ftyp="ftyp"
+header_jxml="xml "
+header_jp2h="jp2h"
+header_jp2c="jp2c"
+
+section_SOC="\xff\x4f"
+section_SOT="\xff\x90"
+section_SOD="\xff\x93"
+section_EOC="\xff\xd9"
+section_SIZ="\xff\x51"
+section_COD="\xff\x52"
+section_COC="\xff\x53"
+section_RGN="\xff\x5e"
+section_QCD="\xff\x5c"
+section_QCC="\xff\x5d"
+section_POC="\xff\x5f"
+section_TLM="\xff\x55"
+section_PLM="\xff\x57"
+section_PLT="\xff\x58"
+section_PPM="\xff\x60"
+section_PPT="\xff\x61"
+section_SOP="\xff\x91"
+section_EPH="\xff\x92"
+section_CRG="\xff\x63"
+section_COM="\xff\x64"
