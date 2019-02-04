@@ -1,6 +1,6 @@
 # AFLSmart: Smart Greybox Fuzzing
 
-AFLSmart is an extension of [AFL](http://lcamtuf.coredump.cx/afl/) from Michał Zaleski. It makes AFL input-structure aware by taking in high-level structural representation of seed files. It combines AFL with Peach input model/grammar definitions. We thank Peach Tech for making [Peach Community version](http://www.peach.tech/resources/peachcommunity/) open source. 
+AFLSmart is an extension of [AFL](http://lcamtuf.coredump.cx/afl/) from Michał Zalewski. It makes AFL input-structure aware by taking in high-level structural representation of seed files. It combines AFL with Peach input model/grammar definitions. We thank Peach Tech for making [Peach Community version](http://www.peach.tech/resources/peachcommunity/) open source. 
 
 The work was done by [Van-Thuan Pham](https://thuanpv.github.io/), [Marcel Böhme](https://mboehme.github.io/), Andrew E. Santosa, Alexandru Răzvan Căciulescu, and [Abhik Roychoudhury](https://www.comp.nus.edu.sg/~abhik/).
 
