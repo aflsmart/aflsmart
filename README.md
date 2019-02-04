@@ -4,7 +4,7 @@ AFLSmart is an extension of [AFL](http://lcamtuf.coredump.cx/afl/) from Michał 
 
 The work was done by [Van-Thuan Pham](https://thuanpv.github.io/), [Marcel Böhme](https://mboehme.github.io/), Andrew E. Santosa, Alexandru Răzvan Căciulescu, and [Abhik Roychoudhury](https://www.comp.nus.edu.sg/~abhik/).
 
-For more details, please checkout our preprint: [Smart Greybox Fuzzing](https://arxiv.org/pdf/1811.09447.pdf).
+For more details, please checkout our preprint: [Smart Greybox Fuzzing](https://arxiv.org/pdf/1811.09447.pdf). The original README file of AFL is [docs/README](https://github.com/aflsmart/aflsmart/blob/master/docs/README).
 
 # Installation
 
