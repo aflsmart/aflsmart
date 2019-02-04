@@ -24,13 +24,15 @@ MISC_PATH   = $(PREFIX)/share/afl
 
 # PROGS intentionally omit afl-as, which gets installed elsewhere.
 
-PROGS       = afl-gcc afl-fuzz afl-showmap afl-tmin afl-gotcpu afl-analyze
+PROGS       = afl-gcc afl-fuzz afl-showmap afl-tmin afl-gotcpu afl-analyze test-chunks
 SH_PROGS    = afl-plot afl-cmin afl-whatsup
 
 CFLAGS     ?= -O3 -funroll-loops
 CFLAGS     += -Wall -D_FORTIFY_SOURCE=2 -g -Wno-pointer-sign \
 	      -DAFL_PATH=\"$(HELPER_PATH)\" -DDOC_PATH=\"$(DOC_PATH)\" \
 	      -DBIN_PATH=\"$(BIN_PATH)\"
+
+LDFLAGS    += -lm
 
 ifneq "$(filter Linux GNU%,$(shell uname))" ""
   LDFLAGS  += -ldl
@@ -69,8 +71,8 @@ afl-as: afl-as.c afl-as.h $(COMM_HDR) | test_x86
 	$(CC) $(CFLAGS) $@.c -o $@ $(LDFLAGS)
 	ln -sf afl-as as
 
-afl-fuzz: afl-fuzz.c $(COMM_HDR) | test_x86
-	$(CC) $(CFLAGS) $@.c -o $@ $(LDFLAGS)
+afl-fuzz: afl-fuzz.c $(COMM_HDR) smart-chunks.o smart-chunks.h smart-utils.o smart-utils.h | test_x86
+	$(CC) $(CFLAGS) $@.c smart-chunks.o smart-utils.o -o $@ $(LDFLAGS)
 
 afl-showmap: afl-showmap.c $(COMM_HDR) | test_x86
 	$(CC) $(CFLAGS) $@.c -o $@ $(LDFLAGS)
@@ -83,6 +85,9 @@ afl-analyze: afl-analyze.c $(COMM_HDR) | test_x86
 
 afl-gotcpu: afl-gotcpu.c $(COMM_HDR) | test_x86
 	$(CC) $(CFLAGS) $@.c -o $@ $(LDFLAGS)
+
+test-chunks: test-chunks.c smart-chunks.o smart-chunks.h smart-utils.o smart-utils.h | test_x86
+	$(CC) $(CFLAGS) $@.c smart-chunks.o smart-utils.o -o $@ $(LDFLAGS)
 
 ifndef AFL_NO_X86
 
@@ -102,7 +107,16 @@ test_build: afl-gcc afl-as afl-showmap
 
 endif
 
-all_done: test_build
+test_chunks: test-chunks
+	@TEST_CHUNKS_DIFF=`./test-chunks | diff - test-data/chunks/chunks.print` ; \
+	if [ "x$$TEST_CHUNKS_DIFF" = "x" ] ; then \
+		echo "[+] Data chunks routines in smart-chunks.c seems to be working!" ; \
+	else \
+		echo "Oops, error in testing smart-chunks routines" ; \
+		exit 1 ; \
+	fi
+
+all_done: test_build test_chunks
 	@if [ ! "`which clang 2>/dev/null`" = "" ]; then echo "[+] LLVM users: see llvm_mode/README.llvm for a faster alternative to afl-gcc."; fi
 	@echo "[+] All done! Be sure to review README - it's pretty short and useful."
 	@if [ "`uname`" = "Darwin" ]; then printf "\nWARNING: Fuzzing on MacOS X is slow because of the unusually high overhead of\nfork() on this OS. Consider using Linux or *BSD. You can also use VirtualBox\n(virtualbox.org) to put AFL inside a Linux or *BSD VM.\n\n"; fi

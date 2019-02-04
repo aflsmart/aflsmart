@@ -1,0 +1,197 @@
+diff --git a/peach-3.0.202-source/Peach.Core/Dom/Action.cs b/peach-3.0.202-source/Peach.Core/Dom/Action.cs
+index 25f5cf1..1830e59 100644
+--- a/peach-3.0.202-source/Peach.Core/Dom/Action.cs
++++ b/peach-3.0.202-source/Peach.Core/Dom/Action.cs
+@@ -40,6 +40,7 @@ using Peach.Core.Dom.XPath;
+ using System.Xml.Serialization;
+ using System.IO;
+ using Peach.Core.IO;
++using Peach.Core.Publishers;
+ 
+ namespace Peach.Core.Dom
+ {
+@@ -104,6 +105,8 @@ namespace Peach.Core.Dom
+ 		protected string _setXpath = null;
+ 		protected string _valueXpath = null;
+ 
++                private int fileLengthBytes = 0;
++
+ 		public string name
+ 		{
+ 			get { return _name; }
+@@ -516,7 +519,18 @@ namespace Peach.Core.Dom
+ 
+ 					case ActionType.Output:
+ 						publisher.start();
+-						publisher.open();
++						if (publisher is FilePublisher) {
++                                                  if (context.config.outputFilePath != null) {
++                                                    FilePublisher filePublisher = (FilePublisher) publisher;
++						    filePublisher.FileName = context.config.outputFilePath;
++                                                  }
++						  if (context.config.inputFilePath != null) {
++						    if (File.Exists(context.config.inputFilePath)) {
++						      fileLengthBytes = (int) new FileInfo(context.config.inputFilePath).Length;
++						    }
++						  }
++						}
++                                                publisher.open();
+ 						handleOutput(publisher);
+ 						parent.parent.dataActions.Add(this);
+ 						break;
+@@ -593,6 +607,18 @@ namespace Peach.Core.Dom
+ 			}
+ 
+ 			publisher.output(ms.GetBuffer(), (int)ms.Position, (int)ms.Length);
++
++			if (publisher is FilePublisher) {
++				FilePublisher filePublisher = (FilePublisher) publisher;
++				dataModel.GenerateBoundaryFile(filePublisher.FileName + ".chunks");
++				if ((int)ms.Length < fileLengthBytes) {
++					Console.WriteLine("error {0}", (100 * ((float)ms.Length / fileLengthBytes)).ToString("n2"));
++				} else if ((int)ms.Length == fileLengthBytes) {
++					Console.WriteLine("ok");
++				} else {
++					//XXX. Should not be here
++				}
++			}
+ 		}
+ 
+ 		protected void handleCall(Publisher publisher, RunContext context)
+diff --git a/peach-3.0.202-source/Peach.Core/Dom/DataModel.cs b/peach-3.0.202-source/Peach.Core/Dom/DataModel.cs
+index 433eba5..a780513 100644
+--- a/peach-3.0.202-source/Peach.Core/Dom/DataModel.cs
++++ b/peach-3.0.202-source/Peach.Core/Dom/DataModel.cs
+@@ -133,6 +133,73 @@ namespace Peach.Core.Dom
+ 				cracking = false;
+ 			}
+ 		}
++
++		public void GenerateBoundaryFile(string filename)
++                {
++                        long pos = 0;
++                        Stack<DataElement> stack = new Stack<DataElement>();
++                        using (System.IO.StreamWriter outputFile = new System.IO.StreamWriter (filename)) {
++                                DataElement root = this;
++                                stack.Push (this);
++                                // Execute the loop until all data elements (nodes) are traversed
++                                while (stack.Count >0) {
++                                        DataElement node = stack.Pop ();
++                                        // If the current node is a DataElementContainer, get all child nodes and push
++                                        // them on top of the stack
++                                        if (node is DataElementContainer) {
++						// Output the name of the current node and its boundary
++						string strName = node.name;
++                                                DataElement ancestor = node.parent;
++                                                while (ancestor != null) {
++                                                        strName = ancestor.name + "~" + strName;
++                                                        ancestor = ancestor.parent;
++                                                }
++
++						if (node.isMutable) {
++                                                	outputFile.WriteLine ("{0},{1},{2},{3}", pos, pos + node.Value.LengthBytes - 1, strName, "Enabled");
++						} else {
++							outputFile.WriteLine ("{0},{1},{2},{3}", pos, pos + node.Value.LengthBytes - 1, strName,"Disabled");
++						}
++
++                                                //Console.WriteLine ("Processing node: {0}", node.name);
++                                                DataElementContainer container = (DataElementContainer)node;
++                                                if (container.Count > 0) {
++                                                        for (int i=container.Count-1; i>=0; i--) {
++                                                                //Console.WriteLine ("Pushing to stack: {0}", container [i].name);
++                                                                stack.Push (container [i]);
++                                                        }
++                                                }
++                                        } else {
++                                                // Output the name of the current node and its boundary
++                                                // in case the node is mutable
++                                                if (node.Value.LengthBytes > 0) {
++                                                        if (node.isMutable) {                                           
++                                                                string strName = node.name;
++                                                                DataElement ancestor = node.parent;
++                                                                while (ancestor != null) {
++                                                                        strName = ancestor.name + "~" + strName;
++                                                                        ancestor = ancestor.parent;
++                                                                }
++                                                                outputFile.WriteLine ("{0},{1},{2},{3}", pos, pos + node.Value.LengthBytes - 1, strName,"Enabled");
++                                                                pos += node.Value.LengthBytes;
++                                                        } else {
++                                                                // If the Data Element is not mutable, just update the position
++                                                                //Console.WriteLine ("DataElement: {0} is not mutable", node.name);
++								string strName = node.name;
++                                                                DataElement ancestor = node.parent;
++                                                                while (ancestor != null) {
++                                                                        strName = ancestor.name + "~" + strName;
++                                                                        ancestor = ancestor.parent;
++                                                                }
++                                                                outputFile.WriteLine ("{0},{1},{2},{3}", pos, pos + node.Value.LengthBytes - 1, strName,"Disabled");
++
++                                                                pos += node.Value.LengthBytes;
++                                                        }
++                                                }
++                                        }
++                                }
++                        }
++                }
+ 	}
+ }
+ 
+diff --git a/peach-3.0.202-source/Peach.Core/Dom/StateModel.cs b/peach-3.0.202-source/Peach.Core/Dom/StateModel.cs
+index 8cad138..97e9f0f 100644
+--- a/peach-3.0.202-source/Peach.Core/Dom/StateModel.cs
++++ b/peach-3.0.202-source/Peach.Core/Dom/StateModel.cs
+@@ -142,7 +142,9 @@ namespace Peach.Core.Dom
+ 
+ 								if (data.DataType == DataType.File)
+ 								{
+-									fileName = data.FileName;
++									//fileName = data.FileName;
++
++									fileName = context.config.inputFilePath;
+ 
+ 									try
+ 									{
+@@ -214,7 +216,8 @@ namespace Peach.Core.Dom
+ 										string fileName = null;
+ 
+ 										if (data.DataType == DataType.File)
+-											fileName = data.FileName;
++											//fileName = data.FileName;
++											fileName = context.config.inputFilePath;
+ 										else if (data.DataType == DataType.Files)
+ 											fileName = data.Files[0];
+ 										else
+diff --git a/peach-3.0.202-source/Peach.Core/RunConfig.cs b/peach-3.0.202-source/Peach.Core/RunConfig.cs
+index 44a4559..943f2a2 100755
+--- a/peach-3.0.202-source/Peach.Core/RunConfig.cs
++++ b/peach-3.0.202-source/Peach.Core/RunConfig.cs
+@@ -112,6 +112,16 @@ namespace Peach.Core
+ 		/// </remarks>
+ 		public uint randomSeed = (uint)DateTime.Now.Ticks & 0x0000FFFF;
+ 
++                /// <summary>
++		/// Full path to the input file to be cracked
++		/// </summary>
++		public string inputFilePath = null;
++
++                /// <summary>
++		/// Full path to the output file (repaired file)
++		/// </summary>
++		public string outputFilePath = null;
++
+ 		/// <summary>
+ 		/// Peach version currently running (used by logger)
+ 		/// </summary>
+diff --git a/peach-3.0.202-source/Peach.Core/Runtime/Program.cs b/peach-3.0.202-source/Peach.Core/Runtime/Program.cs
+index 7096687..1c3c280 100755
+--- a/peach-3.0.202-source/Peach.Core/Runtime/Program.cs
++++ b/peach-3.0.202-source/Peach.Core/Runtime/Program.cs
+@@ -139,6 +139,8 @@ namespace Peach.Core.Runtime
+ 					{ "charlie", var => Charlie() },
+ 					{ "showdevices", var => ShowDevices() },
+ 					{ "showenv", var => ShowEnvironment() },
++					{ "inputFilePath=", v=>config.inputFilePath = v },
++                                        { "outputFilePath=", v=>config.outputFilePath = v },
+ 				};
+ 
+ 				List<string> extra = p.Parse(args);

@@ -1,0 +1,26 @@
+#
+# AFL dictionary for WAV
+# -----------------------------
+#
+# Just the basic, standard-originating sections; does not include vendor
+# extensions.
+#
+#
+
+header_RIFF="RIFF"
+header_WAVE="WAVE"
+
+chunk_FMT="fmt "
+chunk_DATA="data"
+chunk_FACT="fact"
+chunk_SINT="sInt"
+chunk_WAVL="wavl"
+chunk_CUE="cue "
+chunk_PLST="plst"
+chunk_LABL="labl"
+chunk_NOTE="note"
+chunk_LTXE="ltxt"
+chunk_LIST="list"
+chunk_ADTL="adtl"
+chunk_SMPL="smpl"
+chunk_INST="inst"

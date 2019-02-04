@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd">
+	  <Defaults>
+        <Number signed="false" />
+    </Defaults>
+
+    <!-- Generic chunk model -->
+    <DataModel name="CHUNK">
+    	<String name="ID" length="4"/>
+	<Number name="Length" size="32">
+		<Relation type="size" of="Data" />
+	</Number>
+	<Blob name="Data"/>
+        <Padding aligned="true" alignment="16"/>
+    </DataModel>
+
+    <!-- AVI Header List -->
+    <DataModel name="HDRL">
+    	<String name="ID" value="LIST" length="4" token="true"/>
+	<Number name="Size" size="32"/>
+	<String name="Type" value="hdrl" length="4" token="true"/>
+	<Block name="AVIHEADER">
+		<String name="ID" value="avih" length="4" token="true"/>
+		<Number name="Size" size="32"/>
+		<Block name="Data">
+			<Number name="MicroSecPerFrame" size="32"/>
+			<Number name="MaxBytesPerSec" size="32"/>
+			<Number name="Reserved1" size="32"/>
+			<Number name="Flags" size="32"/>
+			<Number name="TotalFrames" size="32"/>
+			<Number name="InitialFrames" size="32"/>
+			<Number name="Streams" size="32"/>
+			<Number name="SuggestedBufferedSize" size="32"/>
+			<Number name="Width" size="32"/>
+			<Number name="Height" size="32"/>
+			<Number name="Scale" size="32"/>
+			<Number name="Rate" size="32"/>
+			<Number name="Start" size="32"/>
+			<Number name="Length" size="32"/>
+		</Block>
+	</Block>
+    </DataModel>
+
+    <!-- String header list, one for each stream -->
+    <DataModel name="CHUNK_strh" ref="CHUNK">
+    	<String name="ID" value="strh" length="4" token="true"/>
+    </DataModel>
+
+    <DataModel name="CHUNK_strf" ref="CHUNK">
+    	<String name="ID" value="strf" length="4" token="true"/>
+    </DataModel>
+
+    <DataModel name="CHUNK_strd" ref="CHUNK">
+    	<String name="ID" value="strd" length="4" token="true"/>
+    </DataModel>
+
+    <DataModel name="CHUNK_strn" ref="CHUNK">
+    	<String name="ID" value="strn" length="4" token="true"/>
+    </DataModel>
+
+    <DataModel name="CHUNK_junk" ref="CHUNK">
+    	<String name="ID" value="JUNK" length="4" token="true"/>
+    </DataModel>
+
+    <DataModel name="STRL">
+    	<String name="ID" value="LIST" length="4" token="true"/>
+	<Number name="Size" size="32"/>
+	<String name="Type" value="strl" length="4" token="true"/>
+	<Block name="Data">
+		<Block name="strh_chunk" ref="CHUNK_strh" minOccurs="1" maxOccurs="1"/>
+		<Block name="strf_chunk" ref="CHUNK_strf" minOccurs="1" maxOccurs="1"/>
+		<Block name="strd_chunk" ref="CHUNK_strd" minOccurs="0" maxOccurs="1"/>
+		<Block name="strn_chunk" ref="CHUNK_strn" minOccurs="0" maxOccurs="1"/>
+                <Block name="junk_chunk" ref="CHUNK_junk" minOccurs="0" maxOccurs="1"/>
+	</Block>
+    </DataModel>
+
+    <!-- Stream data -->
+    <DataModel name="M_CHUNK">
+	<String name="ID_dynamic" length="2"/>
+	<Choice name="Choice_ids">
+		<String name="ID_uvf" value="db" length="2" token="true"/>
+		<String name="ID_cvf" value="dc" length="2" token="true"/>
+		<String name="ID_pc" value="pc" length="2" token="true"/>
+		<String name="ID_au" value="wb" length="2" token="true"/>
+	</Choice>
+	<Number name="Length" size="32">
+		<Relation type="size" of="Data" />
+	</Number>
+	<Blob name="Data"/>
+    </DataModel>
+
+    <DataModel name="MOVI">
+	<String name="ID" value="LIST" length="4" token="true"/>
+	<Number name="Size" size="32">
+		<Relation type="size" of="TypeData_movi" />
+	</Number>
+	<Block name="TypeData_movi">
+		<String name="Type" value="movi" length="4" token="true"/>
+		<Block name="Data" ref="M_CHUNK" maxOccurs="100000"/> 
+	</Block>
+    </DataModel>
+
+    <!-- Index data -->
+    <DataModel name="I_CHUNK">
+	<Number name="ckid" size="32"/>
+	<Number name="flags" size="32"/>
+	<Number name="chunkOffset" size="32"/>
+	<Number name="chunkLength" size="32"/>
+    </DataModel>
+
+    <DataModel name="IDX">
+	<String name="ID" value="idx" length="3" token="true" />
+        <String name="ID_dymanic" length="1" />
+	<Number name="Size" size="32">
+		<Relation type="size" of="Index_data" />
+	</Number>
+	<Block name="Index_data" ref="I_CHUNK" maxOccurs="100000"/>
+    </DataModel>
+
+    <!-- Data model for the whole AVI file -->
+    <DataModel name="AVI">
+      <String name="Signature1" value="RIFF" length="4" token="true"/>
+      <Number name="DataSize" size="32" />
+      <String name="Signature2" value="AVI " length="4" token="true"/>
+      <Block name="List_hdrl" ref="HDRL"/>
+      <Block name="List_strls" ref="STRL" maxOccurs="10"/>
+      <Block name="List_streams" ref="MOVI" maxOccurs="10"/>
+      <Block name="List_idx" ref="IDX" maxOccurs="10"/>
+      <Blob name="Junk" />
+    </DataModel>
+    
+
+    <StateModel name="TheState" initialState="Initial">
+        <State name="Initial">
+
+            <!-- Write out our elf file -->
+            <Action type="output">
+                <DataModel ref="AVI"/>
+                <!-- This is our sample file to read in -->
+                <Data fileName="/dev/null"/>
+            </Action>
+
+            <Action type="close"/>           
+        </State>
+    </StateModel>   
+
+    <Test name="Default">
+        <StateModel ref="TheState"/>
+
+        <Publisher class="File">
+            <Param name="FileName" value="repaired"/>
+        </Publisher>
+
+        <Logger class="Filesystem">
+            <Param name="Path" value="logs" />
+        </Logger>
+    </Test>
+
+        
+</Peach>
+<!-- end -->

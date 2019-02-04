@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Based on this tutorial: http://community.peachfuzzer.com/v3/TutorialFileFuzzing/CreateDataModel.html-->
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd">
+	<Defaults>
+        <Number signed="false" />
+    </Defaults>
+
+    <DataModel name="Chunk">
+        <String name="ID" length="4" padCharacter=" " />
+        <Number name="Size" size="32" >
+            <Relation type="size" of="Data" />
+        </Number>
+        <Blob name="Data" />
+        <Padding alignment="16" />
+    </DataModel>       
+    
+    <DataModel name="ChunkFmt" ref="Chunk">
+        <String name="ID" value="fmt " token="true"/>
+        <Block name="Data">
+            <Number name="CompressionCode" size="16" />
+            <Number name="NumberOfChannels" size="16" />
+            <Number name="SampleRate" size="32" />
+            <Number name="AverageBytesPerSecond" size="32" />
+            <Number name="BlockAlign" size="16" />
+            <Number name="SignificantBitsPerSample" size="16" />
+            <Number name="ExtraFormatBytes" size="16" />
+            <Blob name="ExtraData" />
+        </Block>
+    </DataModel>
+
+    <DataModel name="ChunkData" ref="Chunk">
+        <String name="ID" value="data" token="true"/>
+    </DataModel>
+
+    <DataModel name="ChunkFact" ref="Chunk">
+        <String name="ID" value="fact" token="true"/>
+        <Block name="Data">
+            <Number size="32" />
+            <Blob/>
+        </Block>
+    </DataModel>
+
+    <DataModel name="ChunkSint" ref="Chunk">
+        <String name="ID" value="sInt" token="true"/>
+        <Block name="Data">
+            <Number size="32" />
+        </Block>
+    </DataModel>
+
+    <DataModel name="ChunkWavl" ref="Chunk">
+        <String name="ID" value="wavl" token="true"/>
+        <Block name="Data">
+            <Block name="ArrayOfChunks" maxOccurs="3000">
+                <Block ref="ChunkSint"/>
+                <Block ref="ChunkData" />
+            </Block>
+        </Block>
+    </DataModel>
+
+    <DataModel name="ChunkCue" ref="Chunk">
+        <String name="ID" value="cue " token="true"/>
+        <Block name="Data">
+            <Block name="ArrayOfCues" maxOccurs="3000">
+                <String length="4" />
+                <Number size="32" />
+                <String length="4" />
+                <Number size="32" />
+                <Number size="32" />
+                <Number size="32" />
+            </Block>
+        </Block>
+    </DataModel>
+
+    <DataModel name="ChunkPlst" ref="Chunk">
+        <String name="ID" value="plst" token="true"/>
+        <Block name="Data">
+            <Number name="NumberOfSegments" size="32" >
+                <Relation type="count" of="ArrayOfSegments"/>
+            </Number>
+            <Block name="ArrayOfSegments" maxOccurs="3000">
+                <String length="4" />
+                <Number size="32" />
+                <Number size="32" />
+            </Block>
+        </Block>
+    </DataModel>
+
+    <DataModel name="ChunkLabl" ref="Chunk">
+        <String name="ID" value="labl" token="true"/>
+        <Block name="Data">
+            <Number size="32" />
+            <String nullTerminated="true" />
+        </Block>
+    </DataModel>
+
+    <DataModel name="ChunkNote" ref="ChunkLabl">
+        <String name="ID" value="note" token="true"/>
+    </DataModel>
+
+    <DataModel name="ChunkLtxt" ref="Chunk">
+        <String name="ID" value="ltxt" token="true"/>
+        <Block name="Data">
+            <Number size="32" />
+            <Number size="32" />
+            <Number size="32" />
+            <Number size="16" />
+            <Number size="16" />
+            <Number size="16" />
+            <Number size="16" />
+            <String nullTerminated="true" />
+        </Block>
+    </DataModel>
+
+    <DataModel name="ChunkList" ref="Chunk">
+        <String name="ID" value="list" token="true"/>
+        <Block name="Data">
+            <String value="adtl" token="true" />
+            <Choice maxOccurs="3000">
+                <Block ref="ChunkLabl"/>
+                <Block ref="ChunkNote"/>
+                <Block ref="ChunkLtxt"/>
+                <Block ref="Chunk"/>
+            </Choice>
+        </Block>
+    </DataModel>
+
+    <DataModel name="ChunkSmpl" ref="Chunk">
+        <String name="ID" value="smpl" token="true"/>
+        <Block name="Data">
+            <Number size="32" />
+            <Number size="32" />
+            <Number size="32" />
+            <Number size="32" />
+            <Number size="32" />
+            <Number size="32" />
+            <Number size="32" />
+            <Number size="32" />
+            <Number size="32" />
+            <Block maxOccurs="3000">
+                <Number size="32" />
+                <Number size="32" />
+                <Number size="32" />
+                <Number size="32" />
+                <Number size="32" />
+                <Number size="32" />
+            </Block>
+        </Block>
+    </DataModel>
+
+    <DataModel name="ChunkInst" ref="Chunk">
+        <String name="ID" value="inst" token="true"/>
+        <Block name="Data">
+            <Number size="8"/>
+            <Number size="8"/>
+            <Number size="8"/>
+            <Number size="8"/>
+            <Number size="8"/>
+            <Number size="8"/>
+            <Number size="8"/>
+        </Block>
+    </DataModel>
+
+    <DataModel name="Wav">
+        <!-- wave header -->
+        <String name="Signature" value="RIFF" token="true" />
+        <Number name="Number" size="32" />
+        <String name="WAVE" value="WAVE" token="true"/>
+
+        <Choice name="Chunks" maxOccurs="30000">
+            <Block name="FmtChunk" ref="ChunkFmt"/>
+            <Block name="DataChunk" ref="ChunkData"/>
+            <Block name="FactChunk" ref="ChunkFact"/>
+            <Block name="SintChunk" ref="ChunkSint"/>
+            <Block name="WavlChunk" ref="ChunkWavl"/>
+            <Block name="CueChunk" ref="ChunkCue"/>
+            <Block name="PlstChunk" ref="ChunkPlst"/>
+            <Block name="LtxtChunk" ref="ChunkLtxt"/>
+            <Block name="SmplChunk" ref="ChunkSmpl"/>
+            <Block name="InstChunk" ref="ChunkInst"/>
+            <Block name="OtherChunk" ref="Chunk"/>
+        </Choice>
+    </DataModel>
+
+    <StateModel name="TheState" initialState="Initial">
+        <State name="Initial">
+
+            <!-- Write out our wave file -->
+            <Action type="output">
+                <DataModel ref="Wav"/>
+                <!-- This is our sample file to read in -->
+                <Data fileName="/dev/null"/>
+            </Action>
+
+            <Action type="close"/>
+
+        </State>
+    </StateModel>
+
+    <Test name="Default">
+        <StateModel ref="TheState"/>
+
+        <Publisher class="File">
+            <Param name="FileName" value="repaired"/>
+        </Publisher>
+
+        <Logger class="Filesystem">
+            <Param name="Path" value="logs" />
+        </Logger>
+    </Test>
+
+        
+</Peach>
+<!-- end -->

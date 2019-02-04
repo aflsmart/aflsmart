@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--   Resources from this link: http://puzzor.blogspot.sg/2013/09/peach-pits-of-gif-model.html
+    Author:@Puzzor Weibo;@Puzzorsj twitter
+    Date:2013.09.07
+    Type:GIF
+-->
+<Peach xmlns="http://peachfuzzer.com/2012/Peach"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://peachfuzzer.com/2012/Peach file:/C:/Peach/peach.xsd">
+    <Import import="math"/>
+    <Defaults>
+        <Number signed="false" valueType="hex"/>
+    </Defaults>
+
+    <DataModel name="GIFHeader" minOccurs="1" maxOccurs="1">
+        <String length="3" value="GIF" token="true"/>
+        <Blob name="strVersion" length="3"/>
+    </DataModel>
+
+    <!-- See https://www.fileformat.info/format/gif/egff.htm -->
+    <DataModel name="LogicalScreenDescriptorTemplate">
+        <Number size="16" name="Width"></Number>
+        <Number size="16" name="Height"></Number>
+        <Block name="PackerFields">
+          <Number size="1" name="GlobalColor"/>
+          <Number size="3" name="ColorResolution"/>
+          <Number size="1" name="SortFlag"/>
+          <Number size="3" name="SizeofGlobalColorTable" />
+        </Block>
+        <Number size="8" name="BackgroundColorIndex"></Number>
+        <Number size="8" name="PixelAspectRatio"></Number>
+    </DataModel>   
+    
+    <DataModel name="LogicalScreenDescriptorModel">
+        <Choice name="GlobalColorChoice">
+            <Block name="ChoiceOfGlobalColorT">
+                <Block name="LogicalScreenDescriptorREF" ref="LogicalScreenDescriptorTemplate">
+                    <Block name="PackerFields">
+                      <Number size="1" valueType="string" name="GlobalColor" value="1" token="true"/>
+                      <Number size="3" name="ColorResolution"/>
+                      <Number size="1" name="SortFlag"/>
+                      <Number size="3" name="SizeofGlobalColorTable">
+                          <Relation type="size" of="GlobalColorTableBlob" expressionGet="int(pow(2,(size+1)))*3" expressionSet="int(math.log(size/3,2))-1"/>
+                      </Number>
+                    </Block>
+                    <Blob name="GlobalColorTableBlob"/>
+                </Block>
+            </Block>
+            <Block name="ChoiceOfGlobalColorF" ref="LogicalScreenDescriptorTemplate">
+                <Block name="PackerFields">
+                    <Number size="1" valueType="string" name="GlobalColor" value="0" token="true" />
+                    <Number size="3" name="ColorResolution"/>
+                    <Number size="1" name="SortFlag"/>
+                    <Number size="3" name="SizeofGlobalColorTable" />
+                </Block>
+            </Block>
+        </Choice>   
+    </DataModel>
+
+    <DataModel name="ImageDescriptorTemplate">
+        <Number name="ImageSeparator" value="2C" valueType="hex" token="true" />
+        <Blob name="PositionsAndSize" length="8" />
+        <Block name="PackedFields">
+          <Number size="1" name="LocalColorTableFlag"/>
+          <Number size="1" name="InterlaceFlag"/>
+          <Number size="1" name="SortFlag"/>
+          <Number size="2" name="Reserved"/>
+          <Number size="3" name="SizeOfLocalColorTable"/>
+        </Block>
+    </DataModel>
+
+    <DataModel name="ImageDescriptor">
+        <Choice name="ImageDescriptorLocalColorTableChoice">
+            <Block name="IDLocalColorTableT" ref="ImageDescriptorTemplate">
+                <Block name="PackedFields">
+                  <Number size="1" name="LocalColorTableFlag" value="1" token="true"/>
+                  <Number size="1" name="InterlaceFlag"/>
+                  <Number size="1" name="SortFlag"/>
+                  <Number size="2" name="Reserved"/>
+                  <Number size="3" name="SizeOfLocalColorTable">
+                    <Relation type="size" of="LocalColorTableBlob" expressionGet="int(pow(2,(size+1)))*3" expressionSet="int(math.log(size/3,2))-1"/>
+                  </Number>
+                </Block>
+                <Blob name="LocalColorTableBlob"/>
+            </Block>
+            <Block name="IDLocalColorTableF" ref="ImageDescriptorTemplate">
+                <Block name="PackedFields">
+                  <Number size="1" name="LocalColorTableFlag" value="0" token="true"/>
+                  <Number size="1" name="InterlaceFlag"/>
+                  <Number size="1" name="SortFlag"/>
+                  <Number size="2" name="Reserved"/>
+                  <Number size="3" name="SizeOfLocalColorTable"/>
+                </Block>
+            </Block>
+        </Choice>
+    </DataModel>
+
+    <DataModel name="DataSubBlocksTemplate">
+        <Number size="8" name="BlockSize" constraint="int(element.DefaultValue) != 0">
+            <Relation type="size" of="Data"/>
+        </Number>
+        <Blob name="Data"/>
+    </DataModel>
+
+    <DataModel name="Image">
+        <Block name="ImageDescriptor" ref="ImageDescriptor"/>
+        <Block name="ImageData">
+          <Number size="8" name="LZWMinimumCodeSize"/>
+          <Block name="DataSubBlocks" ref="DataSubBlocksTemplate" maxOccurs="100000"/>
+          <Number size="8" name="BlockTerminator" value="0" token="true"/>
+        </Block>
+    </DataModel>
+    
+    <DataModel name="GIFTrailer">
+        <Blob name="GIFTrailer" value="3B" valueType="hex" mutable="false" length="1" token="true"></Blob>
+    </DataModel>
+
+    <DataModel name="GIF" >
+        <Block name="GIFHeader" ref="GIFHeader"></Block>
+        <Block name="LogicalScreenDescriptorModel" ref="LogicalScreenDescriptorModel"></Block>
+        <Block name="Images" ref="Image" maxOccurs="1000"/>
+        <Block name="GIFTrailer" ref="GIFTrailer"></Block>
+    </DataModel>
+
+		<!-- This is our simple gif state model -->
+	<StateModel name="TheState" initialState="Initial">
+        <State name="Initial">
+
+            <!-- Write out our mp3 file -->
+            <Action type="output">
+                <DataModel ref="GIF"/>
+                <!-- This is our sample file to read in -->
+                <Data fileName="/dev/null"/>
+            </Action>
+
+            <Action type="close"/>
+        </State>
+    </StateModel>
+
+    <Test name="Default">
+        <StateModel ref="TheState"/>
+
+        <Publisher class="File">
+            <Param name="FileName" value="repaired"/>
+        </Publisher>
+
+        <Logger class="Filesystem">
+            <Param name="Path" value="logs" />
+        </Logger>
+    </Test>
+</Peach>

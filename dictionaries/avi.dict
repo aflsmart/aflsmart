@@ -1,0 +1,27 @@
+#
+# AFL dictionary for AVI
+# -----------------------------
+#
+# Just the basic, standard-originating sections; does not include vendor
+# extensions.
+#
+#
+
+header_RIFF="RIFF"
+header_AVI="AVI"
+
+list_LIST="LIST"
+chunk_hdrl="hdrl"
+chunk_avih="avih"
+chunk_strh="strh"
+chunk_strf="strf"
+chunk_strd="strd"
+chunk_strn="strn"
+chunk_JUNK="JUNK"
+chunk_strl="strl"
+chunk_db="db"
+chunk_dc="dc"
+chunk_pc="pc"
+chunk_wb="wb"
+chunk_movi="movi"
+chunk_idx="idx"
