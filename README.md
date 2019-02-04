@@ -34,6 +34,7 @@ Download AFLSmart and compile it.
 git clone https://github.com/aflsmart/aflsmart
 cd aflsmart
 make clean all
+cd ..
 
 export AFLSMART=$(pwd)/aflsmart
 export WORKDIR=$(pwd)
@@ -71,7 +72,10 @@ AFLSmart adds four more options to AFL
 
 -H: limit the number of higher-order mutations for each input. This is an optional option; there is no limit if the option is not set.
 
-Example: afl-fuzz -h -i in -o out -w peach -g <input model file> -x <dictionary file> <executable binary and its arguments> @@
+Example command: 
+```bash
+afl-fuzz -h -i in -o out -w peach -g <input model file> -x <dictionary file> <executable binary and its arguments> @@
+```
 
 During the fuzzing process, AFLSmart will interact with Peach to get the validity and chunks' boundary information. Please check the out/chunks folder and make sure that it is not empty. If it is empty, Peach executable may not be found and you need to compile Peach and/or check the PATH environment variable.
 
