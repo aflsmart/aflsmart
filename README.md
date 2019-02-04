@@ -105,3 +105,19 @@ make clean all
 cd $WORKDIR/WavPack
 timeout 24h $AFLSMART/afl-fuzz -m none -h -d -i $AFLSMART/testcases/aflsmart/wav -o out -w peach -g $AFLSMART/input_models/wav.xml -x $AFLSMART/dictionaries/wav.dict cli/wavpack -y @@ -o out
 ```
+
+## Trophy case
+We would love to hear from you if you have found interesting vulnerabilities with AFLSmart
+
+* FFmpeg: 10 bugs reported, 9 CVEs assigned (CVE-2018-12458, CVE-2018-12459, CVE-2018-12460, CVE-2018-13300, CVE-2018-13301, CVE-2018-13302, CVE-2018-13303, CVE-2018-13304, CVE-2018-13305)
+* PDFium: Issue-912846
+* LibPNG: CVE-2018-13785
+* Binutils: 4 bugs reported, 2 CVEs assigned (CVE-2018-10372, CVE-2018-10373)
+* OpenJPEG: 3 bugs reported
+* Jasper: 11 bugs reported, 5 CVEs assigned (CVE-2018-19539, CVE-2018-19540, CVE-2018-19541, CVE-2018-19542, CVE-2018-19543)
+* LibAV: 6 bugs reported
+* WavPack: CVE-10536, CVE-10537, CVE-10538, CVE-10539, CVE-10540
+
+## Contributions
+
+All contributions are welcome. We would love to get your pull requests for bug fixes, improvements and new input models. We have provided 10 Peach pits for popular file fomrats (e.g., PDF, PNG, AVI ...) and will try to gradually upload more to the repository but there are hundreds of file formats out there and it would be great if AFLSmart's users could contribute their models.
