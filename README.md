@@ -13,14 +13,14 @@ For more details, please checkout our preprint: [Smart Greybox Fuzzing](https://
 
 Install automake and some required packages
 ```bash
-sudo apt-get install automake libtool libc6-dev-i386 python-pip g++-multilib
+sudo apt-get install build-essential automake libtool libc6-dev-i386 python-pip g++-multilib
 ```
 
 Compile and install mono package to support C# on Linux
 ```bash
 sudo apt-get install mono-complete
 ```
-Install gcc-4.4 and g++-4.4
+Install gcc-4.4 and g++-4.4 (as Pin component in Peach has a compilation issue with newer version of gcc like gcc-5.4)
 ```bash
 sudo add-apt-repository ppa:ubuntu-toolchain-r/test
 sudo apt-get update
