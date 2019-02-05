@@ -124,6 +124,9 @@ We would love to hear from you if you have found interesting vulnerabilities wit
 All contributions are welcome. We would love to get your pull requests for bug fixes, improvements and new input models. We have provided 10 Peach pits for popular file fomrats (e.g., PDF, PNG, AVI ...) and will try to gradually upload more to the repository but there are hundreds of file formats out there and it would be great if AFLSmart's users could contribute their models.
 
 ## Licences
+
+AFLSmart is licensed under [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
+
 AFLSmart is an extension of [American Fuzzy Lop](http://lcamtuf.coredump.cx/afl/) written and maintained by Michal Zalewski <<lcamtuf@google.com>>, and builds upon the [Peach Fuzzer Community Edition](http://www.peach.tech/resources/peachcommunity/) written and maintained by [PeachTech](https://www.peach.tech/). We thank PeachTech for making the community version open source.
 * **AFL**: [Copyright](https://github.com/aflsmart/aflsmart/blob/master/docs/README) 2013, 2014, 2015, 2016 Google Inc. All rights reserved. Released under terms and conditions of [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
 * **Peach**: Peach is *not* distributed with this repository. Instead, we ask to download [here](https://sourceforge.net/projects/peachfuzz/files/Peach/3.0/). The Peach Fuzzer Community Edition is [licenced](http://community.peachfuzzer.com/License.html) under the [MIT License](http://en.wikipedia.org/wiki/Mit_license)
