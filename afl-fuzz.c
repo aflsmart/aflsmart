@@ -5251,11 +5251,12 @@ struct chunk *copy_children_with_new_offset(int new_start_byte,
 struct chunk *get_chunk_to_delete(struct chunk **chunks_array, u32 total_chunks,
                                   u32 *del_from, u32 *del_len) {
   struct chunk *chunk_to_delete = NULL;
+  u8 i;
 
   *del_from = 0;
   *del_len = 0;
 
-  for (u8 i = 0; i < 3; ++i) {
+  for (i = 0; i < 3; ++i) {
     int start_byte;
     u32 chunk_id = UR(total_chunks);
 
@@ -5284,12 +5285,13 @@ struct chunk *get_target_to_splice(struct chunk **chunks_array,
                                    u32 total_chunks, int *target_start_byte,
                                    u32 *target_len, u32 *type) {
   struct chunk *target_chunk = NULL;
+  u8 i;
 
   *target_start_byte = 0;
   *target_len = 0;
   *type = 0;
 
-  for (u8 i = 0; i < 3; ++i) {
+  for (i = 0; i < 3; ++i) {
     u32 chunk_id = UR(total_chunks);
     target_chunk = chunks_array[chunk_id];
     *target_start_byte = target_chunk->start_byte;
