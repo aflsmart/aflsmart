@@ -116,7 +116,7 @@ We would love to hear from you if you have found interesting vulnerabilities wit
 * PDFium: Issue-912846
 * LibPNG: CVE-2018-13785
 * Binutils: 4 bugs reported, 2 CVEs assigned (CVE-2018-10372, CVE-2018-10373)
-* OpenJPEG: 3 bugs reported
+* OpenJPEG: 3 bugs reported, 1 CVE assigned (CVE-2018-21010)
 * Jasper: 11 bugs reported, 5 CVEs assigned (CVE-2018-19539, CVE-2018-19540, CVE-2018-19541, CVE-2018-19542, CVE-2018-19543)
 * LibAV: 6 bugs reported
 * WavPack: CVE-10536, CVE-10537, CVE-10538, CVE-10539, CVE-10540
