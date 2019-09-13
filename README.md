@@ -7,7 +7,7 @@ Smart Greybox Fuzzing was developed by [Van-Thuan Pham](https://thuanpv.github.i
 
 See here what has changed versus AFL 2.52b: <https://github.com/aflsmart/aflsmart/compare/2fb5a34..master>
 
-For more details, please checkout our preprint: [Smart Greybox Fuzzing](https://arxiv.org/pdf/1811.09447.pdf). For details on American Fuzzy Lop, we refer to [docs/README](https://github.com/aflsmart/aflsmart/blob/master/docs/README).
+For more details, please checkout our preprint: [Smart Greybox Fuzzing](https://thuanpv.github.io/publications/TSE19_aflsmart.pdf). For details on American Fuzzy Lop, we refer to [docs/README](https://github.com/aflsmart/aflsmart/blob/master/docs/README).
 
 # Installation
 
@@ -69,7 +69,7 @@ AFLSmart adds four more options to AFL
 
 -w: input model type. AFLSmart currently only supports Peach.
 
--g: input model file. Path to the input model file (a.k.a Peach pit) is required. We have provided 10 sample Peach pits in the input_models folder. To write a new Peach pit for a new file format, please follow [this tutorial](http://community.peachfuzzer.com/v3/PeachQuickStart.html) and revisit [Section 4 - File Format Specification](https://arxiv.org/pdf/1811.09447.pdf) of the AFLSmart paper.
+-g: input model file. Path to the input model file (a.k.a Peach pit) is required. We have provided 10 sample Peach pits in the input_models folder. To write a new Peach pit for a new file format, please follow [this tutorial](http://community.peachfuzzer.com/v3/PeachQuickStart.html) and revisit [Section 4 - File Format Specification](https://thuanpv.github.io/publications/TSE19_aflsmart.pdf) of the AFLSmart paper.
 
 -h: stacking mutations mode which mixes normal and higher-order mutation operators together. 
 
@@ -84,7 +84,7 @@ During the fuzzing process, AFLSmart will interact with Peach to get the validit
 
 # Examples
 
-To fuzz WavPack and reproduce CVE-2018-10536. See [Section 2 - Motivating Example](https://arxiv.org/pdf/1811.09447.pdf) in the AFLSmart paper.
+To fuzz WavPack and reproduce CVE-2018-10536. See [Section 2 - Motivating Example](https://thuanpv.github.io/publications/TSE19_aflsmart.pdf) in the AFLSmart paper.
 
 ## Patch afl-fuzz.c to make it work with WavPack as WavPack only takes inputs having correct file extension (e.g., .wav)
 ```bash
