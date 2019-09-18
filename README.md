@@ -9,6 +9,24 @@ See here what has changed versus AFL 2.52b: <https://github.com/aflsmart/aflsmar
 
 For more details, please checkout our preprint: [Smart Greybox Fuzzing](https://thuanpv.github.io/publications/TSE19_aflsmart.pdf). For details on American Fuzzy Lop, we refer to [docs/README](https://github.com/aflsmart/aflsmart/blob/master/docs/README).
 
+# Citing AFLSmart
+AFLSmart has been accepted for publication in a future issue of IEEE Transactions on Software Engineering (TSE). 
+
+```
+@ARTICLE{AFLSmart,
+author={V. {Pham} and M. {Boehme} and A. E. {Santosa} and A. R. {Caciulescu} and A. {Roychoudhury}},
+journal={IEEE Transactions on Software Engineering},
+title={Smart Greybox Fuzzing},
+year={2019},
+volume={},
+number={},
+pages={1-1},
+keywords={Fuzzing;Computer bugs;Libraries;Tools;Dictionaries;Open area test sites;Schedules;vulnerability detection;smart fuzzing;automated testing;file format;grammar;input structure},
+doi={10.1109/TSE.2019.2941681},
+ISSN={},
+month={},}
+```
+
 # Installation
 
 ## Prerequisites
