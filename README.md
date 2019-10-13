@@ -131,7 +131,7 @@ We would love to hear from you if you have found interesting vulnerabilities wit
 * OpenJPEG: 3 bugs reported, 1 CVE assigned (CVE-2018-21010)
 * Jasper: 11 bugs reported, 5 CVEs assigned (CVE-2018-19539, CVE-2018-19540, CVE-2018-19541, CVE-2018-19542, CVE-2018-19543)
 * LibAV: 6 bugs reported
-* WavPack: CVE-10536, CVE-10537, CVE-10538, CVE-10539, CVE-10540
+* WavPack: CVE-2018-10536, CVE-2018-10537, CVE-2018-10538, CVE-2018-10539, CVE-2018-10540
 
 ## Contributions
 
