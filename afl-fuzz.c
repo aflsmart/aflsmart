@@ -101,6 +101,8 @@ EXP_ST u64 mem_limit  = MEM_LIMIT;    /* Memory cap for child (MB)        */
 
 static u32 stats_update_freq = 1;     /* Stats update frequency (execs)   */
 
+static u32 initial_queue_num;
+
 EXP_ST u8  skip_deterministic,        /* Skip deterministic stages?       */
            force_deterministic,       /* Force deterministic stages?      */
            use_splicing,              /* Recombine input files?           */
@@ -5984,9 +5986,10 @@ static u8 fuzz_one(char** argv) {
   }
 
   /* Deferred cracking */
-  if (smart_mode && !queue_cur->chunk
-      && UR(100) < (get_cur_time() - last_path_time) / 50) {
+  if (smart_mode && !queue_cur->chunk && (initial_queue_num > 0
+      || UR(100) < (get_cur_time() - last_path_time) / 50)) {
     update_input_structure(queue_cur->fname, queue_cur);
+    --initial_queue_num;
   }
 
   /************
@@ -7033,7 +7036,7 @@ havoc_stage:
   /* We essentially just do several thousand runs (depending on perf_score)
      where we take the input file and make random stacked tweaks. */
 
-  u8 has_smart_mut = 0;
+  u8 has_smart_mut;
   s32 smart_results = 0, smart_runs = 0;
 
   for (stage_cur = 0; stage_cur < stage_max; stage_cur++) {
@@ -7042,6 +7045,7 @@ havoc_stage:
     u32 higher_order_changed_size = 0;
 
     stage_cur_val = use_stacking;
+    has_smart_mut = 0;
 
     if (smart_mode && !stacking_mutation_mode && !splice_cycle && queue_cur->chunk) {
       for (i = 0; i < use_stacking; i++) {
@@ -9076,6 +9080,7 @@ int main(int argc, char **argv) {
     smart_log_init(out_dir);
 
   read_testcases();
+  initial_queue_num = queued_paths;
   load_auto();
 
   pivot_inputs();
