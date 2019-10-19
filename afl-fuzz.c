@@ -3181,7 +3181,8 @@ static u8* describe_op(u8 hnb) {
 
   if (syncing_party) {
 
-    sprintf(ret, "sync:%s,src:%06u", syncing_party, syncing_case);
+    sprintf(ret, "sync:%s,src:%06u,time:%llu", syncing_party, syncing_case,
+            (get_cur_time() - start_time));
 
   } else {
 
@@ -3189,6 +3190,8 @@ static u8* describe_op(u8 hnb) {
 
     if (splicing_with >= 0)
       sprintf(ret + strlen(ret), "+%06u", splicing_with);
+
+    sprintf(ret + strlen(ret), ",time:%llu", (get_cur_time() - start_time));
 
     sprintf(ret + strlen(ret), ",op:%s", stage_short);
 
