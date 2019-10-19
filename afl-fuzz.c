@@ -322,7 +322,8 @@ enum {
   /* 13 */ STAGE_EXTRAS_UI,
   /* 14 */ STAGE_EXTRAS_AO,
   /* 15 */ STAGE_HAVOC,
-  /* 16 */ STAGE_SPLICE
+  /* 16 */ STAGE_SMART,
+  /* 17 */ STAGE_SPLICE
 };
 
 /* Stage value types */
@@ -4396,8 +4397,9 @@ static void show_stats(void) {
        "  imported : " cRST "%-10s " bSTG bV "\n", tmp,
        sync_id ? DI(queued_imported) : (u8*)"n/a");
 
-  sprintf(tmp, "%s/%s, %s/%s",
+  sprintf(tmp, "%s/%s, %s/%s, %s/%s",
           DI(stage_finds[STAGE_HAVOC]), DI(stage_cycles[STAGE_HAVOC]),
+          DI(stage_finds[STAGE_SMART]), DI(stage_cycles[STAGE_SMART]),
           DI(stage_finds[STAGE_SPLICE]), DI(stage_cycles[STAGE_SPLICE]));
 
   SAYF(bV bSTOP "       havoc : " cRST "%-37s " bSTG bV bSTOP, tmp);
@@ -7028,6 +7030,9 @@ havoc_stage:
   /* We essentially just do several thousand runs (depending on perf_score)
      where we take the input file and make random stacked tweaks. */
 
+  u8 has_smart_mut = 0;
+  s32 smart_results = 0, smart_runs = 0;
+
   for (stage_cur = 0; stage_cur < stage_max; stage_cur++) {
     u32 use_stacking = 1 << (1 + UR(HAVOC_STACK_POW2));
     u8 changed_size = 0;
@@ -7042,6 +7047,7 @@ havoc_stage:
               higher_order_fuzzing(queue_cur, &temp_len, &out_buf, len);
           if (changed_structure)
             higher_order_changed_size++;
+          has_smart_mut = 1;
         }
       }
       goto fuzz_one_common_fuzz_call;
@@ -7337,6 +7343,7 @@ havoc_stage:
                 higher_order_fuzzing(queue_cur, &temp_len, &out_buf, len);
             if (changed_structure)
               higher_order_changed_size++;
+            has_smart_mut = 1;
           }
           break;
         }
@@ -7446,7 +7453,7 @@ second_optional_mutation:
 
   fuzz_one_common_fuzz_call:
 
-    if (smart_mode && higher_order_changed_size > 0) {
+    if (smart_mode && has_smart_mut) {
       if (!splice_cycle) {
 
         stage_name = "havoc-smart";
@@ -7475,9 +7482,19 @@ second_optional_mutation:
         stage_short = "splice";
       }
     }
+    
+    s32 tmp_hit_cnt = queued_paths + unique_crashes;
 
     if (common_fuzz_stuff(argv, out_buf, temp_len))
       goto abandon_entry;
+    
+    if (has_smart_mut) {
+
+      if ((tmp_hit_cnt -= queued_paths + unique_crashes) > 0)
+        smart_results += tmp_hit_cnt;
+      smart_runs += 1;
+
+    }
 
     /* out_buf might have been mangled a bit, so let's restore it to its
        original size and shape. */
@@ -7515,8 +7532,10 @@ second_optional_mutation:
   new_hit_cnt = queued_paths + unique_crashes;
 
   if (!splice_cycle) {
-    stage_finds[STAGE_HAVOC]  += new_hit_cnt - orig_hit_cnt;
-    stage_cycles[STAGE_HAVOC] += stage_max;
+    stage_finds[STAGE_HAVOC]  += new_hit_cnt - orig_hit_cnt - smart_results;
+    stage_cycles[STAGE_HAVOC] += stage_max - smart_runs;
+    stage_finds[STAGE_SMART]  += smart_results;
+    stage_cycles[STAGE_SMART] += smart_runs;
   } else {
     stage_finds[STAGE_SPLICE]  += new_hit_cnt - orig_hit_cnt;
     stage_cycles[STAGE_SPLICE] += stage_max;
