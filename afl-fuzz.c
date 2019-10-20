@@ -92,7 +92,8 @@ EXP_ST u8 *in_dir,                    /* Input directory with test cases  */
           *doc_path,                  /* Path to documentation dir        */
           *target_path,               /* Path to target binary            */
           *orig_cmdline,              /* Original command line            */
-          *input_model_file;          /* Input model file                 */
+          *input_model_file,          /* Input model file                 */
+          *file_extension;            /* Extension of .cur_input          */
 
 EXP_ST u32 exec_tmout = EXEC_TIMEOUT; /* Configurable exec timeout (ms)   */
 static u32 hang_tmout = EXEC_TIMEOUT; /* Timeout used for hang det (ms)   */
@@ -3983,7 +3984,16 @@ static void maybe_delete_out_dir(void) {
 
   /* And now, for some finishing touches. */
 
-  fn = alloc_printf("%s/.cur_input", out_dir);
+  if (file_extension) {
+
+    fn = alloc_printf("%s/.cur_input.%s", out_dir, file_extension);
+
+  } else {
+
+    fn = alloc_printf("%s/.cur_input", out_dir);
+
+  }
+
   if (unlink(fn) && errno != ENOENT) goto dir_cleanup_failed;
   ck_free(fn);
 
@@ -8265,7 +8275,16 @@ EXP_ST void setup_dirs_fds(void) {
 
 EXP_ST void setup_stdio_file(void) {
 
-  u8* fn = alloc_printf("%s/.cur_input", out_dir);
+  u8* fn;
+  if (file_extension) {
+
+    fn = alloc_printf("%s/.cur_input.%s", out_dir, file_extension);
+
+  } else {
+
+    fn = alloc_printf("%s/.cur_input", out_dir);
+
+  }
 
   unlink(fn); /* Ignore errors */
 
@@ -8782,7 +8801,7 @@ int main(int argc, char **argv) {
   gettimeofday(&tv, &tz);
   srandom(tv.tv_sec ^ tv.tv_usec ^ getpid());
 
-  while ((opt = getopt(argc, argv, "+i:o:f:m:t:T:dnCB:S:M:x:Qw:g:lhH:")) > 0)
+  while ((opt = getopt(argc, argv, "+i:o:f:m:t:T:dnCB:S:M:x:Qw:g:lhH:e")) > 0)
 
     switch (opt) {
 
@@ -9000,6 +9019,15 @@ int main(int argc, char **argv) {
         if (errno) FATAL("Numeric format error of -H option");
 
         break;
+
+      case 'e':
+
+        if (file_extension) FATAL("Multiple -e options not supported");
+
+        file_extension = optarg;
+
+        break;
+
       default:
 
         usage(argv[0]);
