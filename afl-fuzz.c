@@ -8605,8 +8605,12 @@ EXP_ST void detect_file_args(char** argv) {
 
       /* If we don't have a file name chosen yet, use a safe default. */
 
-      if (!out_file)
-        out_file = alloc_printf("%s/.cur_input", out_dir);
+      if (!out_file) {
+        if (file_extension)
+          out_file = alloc_printf("%s/.cur_input.%s", out_dir, file_extension);
+        else
+          out_file = alloc_printf("%s/.cur_input", out_dir);
+      }
 
       /* Be sure that we're always using fully-qualified paths. */
 
@@ -9059,6 +9063,9 @@ int main(int argc, char **argv) {
     if (qemu_mode)  FATAL("-Q and -n are mutually exclusive");
 
   }
+
+  if (file_extension)
+    OKF("Using the %s extension for the input file", file_extension);
 
   if (getenv("AFL_NO_FORKSRV"))    no_forkserver    = 1;
   if (getenv("AFL_NO_CPU_RED"))    no_cpu_meter_red = 1;
