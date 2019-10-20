@@ -7507,8 +7507,8 @@ second_optional_mutation:
     
     if (has_smart_mut) {
 
-      if ((tmp_hit_cnt -= queued_paths + unique_crashes) > 0)
-        smart_results += tmp_hit_cnt;
+      if (tmp_hit_cnt != queued_paths + unique_crashes)
+        smart_results += (queued_paths + unique_crashes) - tmp_hit_cnt;
       smart_runs += 1;
 
     }
