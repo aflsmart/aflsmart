@@ -70,6 +70,7 @@ CC=gcc-4.4 CXX=g++-4.4 ./waf install
 ## Setup PATH environment variables
 
 ```bash
+cd $AFLSMART
 source $AFLSMART/setup_env.sh
 ```
 
