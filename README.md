@@ -70,9 +70,8 @@ CC=gcc-4.4 CXX=g++-4.4 ./waf install
 ## Setup PATH environment variables
 
 ```bash
-export PATH=$PATH:$AFLSMART:$AFLSMART/peach-3.0.202-source/output/linux_x86_64_debug/bin
-export AFL_PATH=$AFLSMART
-export LD_LIBRARY_PATH=/usr/local/lib
+cd $AFLSMART
+source $AFLSMART/setup_env.sh
 ```
 
 # Usage
@@ -98,13 +97,6 @@ During the fuzzing process, AFLSmart will interact with Peach to get the validit
 
 To fuzz WavPack and reproduce CVE-2018-10536. See [Section 2 - Motivating Example](https://thuanpv.github.io/publications/TSE19_aflsmart.pdf) in the AFLSmart paper.
 
-## Patch afl-fuzz.c to make it work with WavPack as WavPack only takes inputs having correct file extension (e.g., .wav)
-```bash
-cd $AFLSMART
-sed -i 's/cur_input/cur_input.wav/g' afl-fuzz.c
-make clean all
-```
-
 ## Compile the vulnerable version of WavPack
 ```bash
 cd $WORKDIR
@@ -118,7 +110,7 @@ make clean all
 ## Fuzz it in 24 hrs
 ```bash
 cd $WORKDIR/WavPack
-timeout 24h $AFLSMART/afl-fuzz -m none -h -d -i $AFLSMART/testcases/aflsmart/wav -o out -w peach -g $AFLSMART/input_models/wav.xml -x $AFLSMART/dictionaries/wav.dict cli/wavpack -y @@ -o out
+timeout 24h $AFLSMART/afl-fuzz -m none -h -d -i $AFLSMART/testcases/aflsmart/wav -o out -w peach -g $AFLSMART/input_models/wav.xml -x $AFLSMART/dictionaries/wav.dict -e wav -- ./cli/wavpack -y @@ -o out
 ```
 
 ## Trophy case

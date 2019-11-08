@@ -92,7 +92,8 @@ EXP_ST u8 *in_dir,                    /* Input directory with test cases  */
           *doc_path,                  /* Path to documentation dir        */
           *target_path,               /* Path to target binary            */
           *orig_cmdline,              /* Original command line            */
-          *input_model_file;          /* Input model file                 */
+          *input_model_file,          /* Input model file                 */
+          *file_extension;            /* Extension of .cur_input          */
 
 EXP_ST u32 exec_tmout = EXEC_TIMEOUT; /* Configurable exec timeout (ms)   */
 static u32 hang_tmout = EXEC_TIMEOUT; /* Timeout used for hang det (ms)   */
@@ -100,6 +101,8 @@ static u32 hang_tmout = EXEC_TIMEOUT; /* Timeout used for hang det (ms)   */
 EXP_ST u64 mem_limit  = MEM_LIMIT;    /* Memory cap for child (MB)        */
 
 static u32 stats_update_freq = 1;     /* Stats update frequency (execs)   */
+
+static u32 initial_queue_num;
 
 EXP_ST u8  skip_deterministic,        /* Skip deterministic stages?       */
            force_deterministic,       /* Force deterministic stages?      */
@@ -322,7 +325,8 @@ enum {
   /* 13 */ STAGE_EXTRAS_UI,
   /* 14 */ STAGE_EXTRAS_AO,
   /* 15 */ STAGE_HAVOC,
-  /* 16 */ STAGE_SPLICE
+  /* 16 */ STAGE_SMART,
+  /* 17 */ STAGE_SPLICE
 };
 
 /* Stage value types */
@@ -3139,7 +3143,8 @@ static void pivot_inputs(void) {
       u8* use_name = strstr(rsl, ",orig:");
 
       if (use_name) use_name += 6; else use_name = rsl;
-      nfn = alloc_printf("%s/queue/id:%06u,orig:%s", out_dir, id, use_name);
+      nfn = alloc_printf("%s/queue/id:%06u,time:0,orig:%s", out_dir, id,
+                         use_name);
 
 #else
 
@@ -3180,7 +3185,8 @@ static u8* describe_op(u8 hnb) {
 
   if (syncing_party) {
 
-    sprintf(ret, "sync:%s,src:%06u", syncing_party, syncing_case);
+    sprintf(ret, "sync:%s,src:%06u,time:%llu", syncing_party, syncing_case,
+            (get_cur_time() - start_time));
 
   } else {
 
@@ -3188,6 +3194,8 @@ static u8* describe_op(u8 hnb) {
 
     if (splicing_with >= 0)
       sprintf(ret + strlen(ret), "+%06u", splicing_with);
+
+    sprintf(ret + strlen(ret), ",time:%llu", (get_cur_time() - start_time));
 
     sprintf(ret + strlen(ret), ",op:%s", stage_short);
 
@@ -3977,7 +3985,16 @@ static void maybe_delete_out_dir(void) {
 
   /* And now, for some finishing touches. */
 
-  fn = alloc_printf("%s/.cur_input", out_dir);
+  if (file_extension) {
+
+    fn = alloc_printf("%s/.cur_input.%s", out_dir, file_extension);
+
+  } else {
+
+    fn = alloc_printf("%s/.cur_input", out_dir);
+
+  }
+
   if (unlink(fn) && errno != ENOENT) goto dir_cleanup_failed;
   ck_free(fn);
 
@@ -4396,8 +4413,9 @@ static void show_stats(void) {
        "  imported : " cRST "%-10s " bSTG bV "\n", tmp,
        sync_id ? DI(queued_imported) : (u8*)"n/a");
 
-  sprintf(tmp, "%s/%s, %s/%s",
+  sprintf(tmp, "%s/%s, %s/%s, %s/%s",
           DI(stage_finds[STAGE_HAVOC]), DI(stage_cycles[STAGE_HAVOC]),
+          DI(stage_finds[STAGE_SMART]), DI(stage_cycles[STAGE_SMART]),
           DI(stage_finds[STAGE_SPLICE]), DI(stage_cycles[STAGE_SPLICE]));
 
   SAYF(bV bSTOP "       havoc : " cRST "%-37s " bSTG bV bSTOP, tmp);
@@ -5979,9 +5997,10 @@ static u8 fuzz_one(char** argv) {
   }
 
   /* Deferred cracking */
-  if (smart_mode && !queue_cur->chunk
-      && UR(100) < (get_cur_time() - last_path_time) / 50) {
+  if (smart_mode && !queue_cur->chunk && (initial_queue_num > 0
+      || UR(100) < (get_cur_time() - last_path_time) / 50)) {
     update_input_structure(queue_cur->fname, queue_cur);
+    --initial_queue_num;
   }
 
   /************
@@ -7028,12 +7047,16 @@ havoc_stage:
   /* We essentially just do several thousand runs (depending on perf_score)
      where we take the input file and make random stacked tweaks. */
 
+  u8 has_smart_mut;
+  s32 smart_results = 0, smart_runs = 0;
+
   for (stage_cur = 0; stage_cur < stage_max; stage_cur++) {
     u32 use_stacking = 1 << (1 + UR(HAVOC_STACK_POW2));
     u8 changed_size = 0;
     u32 higher_order_changed_size = 0;
 
     stage_cur_val = use_stacking;
+    has_smart_mut = 0;
 
     if (smart_mode && !stacking_mutation_mode && !splice_cycle && queue_cur->chunk) {
       for (i = 0; i < use_stacking; i++) {
@@ -7042,6 +7065,7 @@ havoc_stage:
               higher_order_fuzzing(queue_cur, &temp_len, &out_buf, len);
           if (changed_structure)
             higher_order_changed_size++;
+          has_smart_mut = 1;
         }
       }
       goto fuzz_one_common_fuzz_call;
@@ -7337,6 +7361,7 @@ havoc_stage:
                 higher_order_fuzzing(queue_cur, &temp_len, &out_buf, len);
             if (changed_structure)
               higher_order_changed_size++;
+            has_smart_mut = 1;
           }
           break;
         }
@@ -7446,7 +7471,7 @@ second_optional_mutation:
 
   fuzz_one_common_fuzz_call:
 
-    if (smart_mode && higher_order_changed_size > 0) {
+    if (smart_mode && has_smart_mut) {
       if (!splice_cycle) {
 
         stage_name = "havoc-smart";
@@ -7475,9 +7500,19 @@ second_optional_mutation:
         stage_short = "splice";
       }
     }
+    
+    s32 tmp_hit_cnt = queued_paths + unique_crashes;
 
     if (common_fuzz_stuff(argv, out_buf, temp_len))
       goto abandon_entry;
+    
+    if (has_smart_mut) {
+
+      if (tmp_hit_cnt != queued_paths + unique_crashes)
+        smart_results += (queued_paths + unique_crashes) - tmp_hit_cnt;
+      smart_runs += 1;
+
+    }
 
     /* out_buf might have been mangled a bit, so let's restore it to its
        original size and shape. */
@@ -7515,8 +7550,10 @@ second_optional_mutation:
   new_hit_cnt = queued_paths + unique_crashes;
 
   if (!splice_cycle) {
-    stage_finds[STAGE_HAVOC]  += new_hit_cnt - orig_hit_cnt;
-    stage_cycles[STAGE_HAVOC] += stage_max;
+    stage_finds[STAGE_HAVOC]  += new_hit_cnt - orig_hit_cnt - smart_results;
+    stage_cycles[STAGE_HAVOC] += stage_max - smart_runs;
+    stage_finds[STAGE_SMART]  += smart_results;
+    stage_cycles[STAGE_SMART] += smart_runs;
   } else {
     stage_finds[STAGE_SPLICE]  += new_hit_cnt - orig_hit_cnt;
     stage_cycles[STAGE_SPLICE] += stage_max;
@@ -8239,7 +8276,16 @@ EXP_ST void setup_dirs_fds(void) {
 
 EXP_ST void setup_stdio_file(void) {
 
-  u8* fn = alloc_printf("%s/.cur_input", out_dir);
+  u8* fn;
+  if (file_extension) {
+
+    fn = alloc_printf("%s/.cur_input.%s", out_dir, file_extension);
+
+  } else {
+
+    fn = alloc_printf("%s/.cur_input", out_dir);
+
+  }
 
   unlink(fn); /* Ignore errors */
 
@@ -8560,8 +8606,12 @@ EXP_ST void detect_file_args(char** argv) {
 
       /* If we don't have a file name chosen yet, use a safe default. */
 
-      if (!out_file)
-        out_file = alloc_printf("%s/.cur_input", out_dir);
+      if (!out_file) {
+        if (file_extension)
+          out_file = alloc_printf("%s/.cur_input.%s", out_dir, file_extension);
+        else
+          out_file = alloc_printf("%s/.cur_input", out_dir);
+      }
 
       /* Be sure that we're always using fully-qualified paths. */
 
@@ -8756,7 +8806,7 @@ int main(int argc, char **argv) {
   gettimeofday(&tv, &tz);
   srandom(tv.tv_sec ^ tv.tv_usec ^ getpid());
 
-  while ((opt = getopt(argc, argv, "+i:o:f:m:t:T:dnCB:S:M:x:Qw:g:lhH:")) > 0)
+  while ((opt = getopt(argc, argv, "+i:o:f:m:t:T:dnCB:S:M:x:Qw:g:lhH:e:")) > 0)
 
     switch (opt) {
 
@@ -8974,6 +9024,15 @@ int main(int argc, char **argv) {
         if (errno) FATAL("Numeric format error of -H option");
 
         break;
+
+      case 'e':
+
+        if (file_extension) FATAL("Multiple -e options not supported");
+
+        file_extension = optarg;
+
+        break;
+
       default:
 
         usage(argv[0]);
@@ -9005,6 +9064,9 @@ int main(int argc, char **argv) {
     if (qemu_mode)  FATAL("-Q and -n are mutually exclusive");
 
   }
+
+  if (file_extension)
+    OKF("Using the %s extension for the input file", file_extension);
 
   if (getenv("AFL_NO_FORKSRV"))    no_forkserver    = 1;
   if (getenv("AFL_NO_CPU_RED"))    no_cpu_meter_red = 1;
@@ -9054,6 +9116,7 @@ int main(int argc, char **argv) {
     smart_log_init(out_dir);
 
   read_testcases();
+  initial_queue_num = queued_paths;
   load_auto();
 
   pivot_inputs();
