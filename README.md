@@ -14,7 +14,7 @@ AFLSmart has been accepted for publication in a future issue of IEEE Transaction
 
 ```
 @ARTICLE{AFLSmart,
-author={V. {Pham} and M. {Boehme} and A. E. {Santosa} and A. R. {Caciulescu} and A. {Roychoudhury}},
+author={V. {Pham} and M. {B{\"o}hme} and A. E. {Santosa} and A. R. {Caciulescu} and A. {Roychoudhury}},
 journal={IEEE Transactions on Software Engineering},
 title={Smart Greybox Fuzzing},
 year={2019},
