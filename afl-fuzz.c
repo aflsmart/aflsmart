@@ -5284,7 +5284,7 @@ struct chunk *get_chunk_to_delete(struct chunk **chunks_array, u32 total_chunks,
     /* It is possible that either the start or the end bytes are
        unknown (has negative values), so we actually perform the
        deletion only when these bounds are known. */
-    if (start_byte >= 0 &&
+    if (chunk_to_delete->modifiable && start_byte >= 0 &&
         chunk_to_delete->end_byte >= start_byte) {
       /* Note that the length to be deleted here is 1 more than
          end_byte - start_byte, since the end_byte is exactly the
@@ -5314,7 +5314,7 @@ struct chunk *get_target_to_splice(struct chunk **chunks_array,
     target_chunk = chunks_array[chunk_id];
     *target_start_byte = target_chunk->start_byte;
 
-    if (*target_start_byte >= 0 &&
+    if (target_chunk->modifiable && *target_start_byte >= 0 &&
         target_chunk->end_byte >= *target_start_byte) {
       *target_len = target_chunk->end_byte - *target_start_byte + 1;
       *type = target_chunk->type;
