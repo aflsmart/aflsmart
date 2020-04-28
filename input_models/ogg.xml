@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Based on this tutorial: http://community.peachfuzzer.com/v3/TutorialFileFuzzing/CreateDataModel.html-->
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd">
+	  <Defaults>
+        <Number signed="false" />
+    </Defaults>
+
+    <DataModel name="Page">
+        <String name="ID" value="OggS" token="true"/>
+        <Blob name="Data" />
+    </DataModel>       
+    
+    <DataModel name="Ogg">
+        <Block name="Pages" ref="Page" maxOccurs="30000" />
+    </DataModel>
+
+    <StateModel name="TheState" initialState="Initial">
+        <State name="Initial">
+
+            <!-- Write to file -->
+            <Action type="output">
+                <DataModel ref="Ogg"/>
+                <!-- This is our sample file to read in -->
+                <Data fileName="/dev/null"/>
+            </Action>
+
+            <Action type="close"/>
+
+        </State>
+    </StateModel>
+
+    <Test name="Default">
+        <StateModel ref="TheState"/>
+
+        <Publisher class="File">
+            <Param name="FileName" value="repaired"/>
+        </Publisher>
+
+        <Logger class="Filesystem">
+            <Param name="Path" value="logs" />
+        </Logger>
+    </Test>
+
+        
+</Peach>
+<!-- end -->

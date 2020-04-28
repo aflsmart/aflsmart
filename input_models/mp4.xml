@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Based on this tutorial: http://community.peachfuzzer.com/v3/TutorialFileFuzzing/CreateDataModel.html-->
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd">
+	<Defaults>
+        <Number endian="big" />
+    </Defaults>
+
+    <DataModel name="BoxGeneric">
+        <Block name="BoxGenericContent">
+            <Number name="Size" size="32" >
+                <Relation type="size" of="BoxGenericContent" />
+            </Number>
+            <String name="Type" length="4" padCharacter=" " />
+            <Blob name="Data" />
+        </Block>
+    </DataModel>       
+
+    <DataModel name="BoxFtyp">
+        <Block name="BoxFtypContent">
+            <Number name="Size" size="32" >
+                <Relation type="size" of="BoxFtypContent" />
+            </Number>
+            <String name="Type" length="4" value="ftyp" token="true" />
+            <Blob name="Data" />
+        </Block>
+    </DataModel> 
+
+    <DataModel name="BoxFree">
+        <Block name="BoxFreeContent">
+            <Number name="Size" size="32" >
+                <Relation type="size" of="BoxFreeContent" />
+            </Number>
+            <String name="Type" length="4" value="free" token="true" />
+            <Blob name="Data" />
+        </Block>
+    </DataModel> 
+
+    <DataModel name="BoxMdat">
+        <Block name="BoxMdatContent">
+            <Number name="Size" size="32" >
+                <Relation type="size" of="BoxMdatContent" />
+            </Number>
+            <String name="Type" length="4" value="mdat" token="true" />
+            <Blob name="Data" />
+        </Block>
+    </DataModel> 
+
+    <DataModel name="BoxMvhd">
+        <Block name="BoxMvhdContent">
+            <Number name="Size" size="32" >
+                <Relation type="size" of="BoxMvhdContent" />
+            </Number>
+            <String name="Type" length="4" value="mvhd" token="true" />
+            <Blob name="Data" />
+        </Block>
+    </DataModel>
+
+    <DataModel name="BoxIods">
+        <Block name="BoxIodsContent">
+            <Number name="Size" size="32" >
+                <Relation type="size" of="BoxIodsContent" />
+            </Number>
+            <String name="Type" length="4" value="iods" token="true" />
+            <Blob name="Data" />
+        </Block>
+    </DataModel>
+
+    <DataModel name="BoxTrak">
+        <Block name="BoxTrakContent">
+            <Number name="Size" size="32" >
+                <Relation type="size" of="BoxTrakContent" />
+            </Number>
+            <String name="Type" length="4" value="trak" token="true" />
+            <Block name="Children" ref="BoxGeneric" maxOccurs="10000" />
+        </Block>
+    </DataModel>
+
+    <DataModel name="BoxMoov">
+        <Block name="BoxMoovContent">
+            <Number name="Size" size="32" >
+                <Relation type="size" of="BoxMoovContent" />
+            </Number>
+            <String name="Type" length="4" value="moov" token="true" />
+            <Choice name="ChildrenBoxes" minOccurs="0" maxOccurs="10000" >
+                <Block name="Mvhd" ref="BoxMvhd" />
+                <Block name="Iods" ref="BoxIods" />
+                <Block name="Free" ref="BoxFree" />
+                <Block name="Trak" ref="BoxTrak" />
+                <Block name="Generic" ref="BoxGeneric" />
+            </Choice>
+        </Block>
+    </DataModel>        
+
+    <DataModel name="Mp4">
+        <Choice name="Boxes" minOccurs="0" maxOccurs="10000" >
+            <Block name="Ftyp" ref="BoxFtyp" />
+            <Block name="Moov" ref="BoxMoov" />
+            <Block name="Free" ref="BoxFree" />
+            <Block name="Mdat" ref="BoxMdat" />
+            <Block name="Generic" ref="BoxGeneric" />
+        </Choice>
+    </DataModel>
+
+    <StateModel name="TheState" initialState="Initial">
+        <State name="Initial">
+
+            <!-- Write to file -->
+            <Action type="output">
+                <DataModel ref="Mp4"/>
+                <!-- This is our sample file to read in -->
+                <Data fileName="/dev/null"/>
+            </Action>
+
+            <Action type="close"/>
+
+        </State>
+    </StateModel>
+
+    <Test name="Default">
+        <StateModel ref="TheState"/>
+
+        <Publisher class="File">
+            <Param name="FileName" value="repaired"/>
+        </Publisher>
+
+        <Logger class="Filesystem">
+            <Param name="Path" value="logs" />
+        </Logger>
+    </Test>
+
+        
+</Peach>
+<!-- end -->

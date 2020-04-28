@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd">
+	<Defaults>
+        <Number signed="false" valueType="hex" endian="big"/>
+    </Defaults>
+
+    <DataModel name="Event">       
+        <Number name="EventMajorType" size="8"/>        
+        <Blob name="EventData"/>
+    </DataModel>
+
+    <DataModel name="MetaEvent" ref="Event">
+        <Number name="EventMajorType" value="FF" size="8" token="true"/>        
+        <Block name="EventData">
+            <Number name="Type" size="8"/>
+            <Number name="Length" size="8">
+                <Relation type="size" of="MetaData" />
+            </Number>
+            <Blob name="MetaData"/>
+        </Block>
+    </DataModel>
+
+    <DataModel name="ControllerEvent" ref="Event">
+        <Choice name="EventMajorType">
+            <Number name="Type1" value="B0" size="8" token="true"/>
+            <Number name="Type2" value="B1" size="8" token="true"/> 
+            <Number name="Type3" value="B2" size="8" token="true"/>
+            <Number name="Type4" value="B3" size="8" token="true"/> 
+            <Number name="Type5" value="B4" size="8" token="true"/>
+            <Number name="Type6" value="B5" size="8" token="true"/> 
+            <Number name="Type7" value="B6" size="8" token="true"/>
+            <Number name="Type8" value="B7" size="8" token="true"/> 
+            <Number name="Type9" value="B8" size="8" token="true"/>
+            <Number name="Type10" value="B9" size="8" token="true"/> 
+            <Number name="Type11" value="BA" size="8" token="true"/>
+            <Number name="Type12" value="BB" size="8" token="true"/> 
+            <Number name="Type13" value="BC" size="8" token="true"/>
+            <Number name="Type14" value="BD" size="8" token="true"/> 
+            <Number name="Type15" value="BE" size="8" token="true"/>
+            <Number name="Type16" value="BF" size="8" token="true"/>
+        </Choice>
+        <Block name="EventData">
+            <Number name="Controller" size="8"/>
+            <Number name="Value" size="8"/>
+        </Block>
+    </DataModel>
+
+    <DataModel name="ProgramEvent" ref="Event">
+        <Choice name="EventMajorType">
+            <Number name="Type1" value="C0" size="8" token="true"/>
+            <Number name="Type2" value="C1" size="8" token="true"/> 
+            <Number name="Type3" value="C2" size="8" token="true"/>
+            <Number name="Type4" value="C3" size="8" token="true"/> 
+            <Number name="Type5" value="C4" size="8" token="true"/>
+            <Number name="Type6" value="C5" size="8" token="true"/> 
+            <Number name="Type7" value="C6" size="8" token="true"/>
+            <Number name="Type8" value="C7" size="8" token="true"/> 
+            <Number name="Type9" value="C8" size="8" token="true"/>
+            <Number name="Type10" value="C9" size="8" token="true"/> 
+            <Number name="Type11" value="CA" size="8" token="true"/>
+            <Number name="Type12" value="CB" size="8" token="true"/> 
+            <Number name="Type13" value="CC" size="8" token="true"/>
+            <Number name="Type14" value="CD" size="8" token="true"/> 
+            <Number name="Type15" value="CE" size="8" token="true"/>
+            <Number name="Type16" value="CF" size="8" token="true"/>          
+        </Choice>
+        <Block name="EventData">
+            <Number name="Program" size="8"/>
+        </Block>
+    </DataModel>
+
+    <DataModel name="ChannelPressureEvent" ref="Event">
+        <Choice name="EventMajorType">
+            <Number name="Type1" value="D0" size="8" token="true"/>
+            <Number name="Type2" value="D1" size="8" token="true"/> 
+            <Number name="Type3" value="D2" size="8" token="true"/>
+            <Number name="Type4" value="D3" size="8" token="true"/> 
+            <Number name="Type5" value="D4" size="8" token="true"/>
+            <Number name="Type6" value="D5" size="8" token="true"/> 
+            <Number name="Type7" value="D6" size="8" token="true"/>
+            <Number name="Type8" value="D7" size="8" token="true"/> 
+            <Number name="Type9" value="D8" size="8" token="true"/>
+            <Number name="Type10" value="D9" size="8" token="true"/> 
+            <Number name="Type11" value="DA" size="8" token="true"/>
+            <Number name="Type12" value="DB" size="8" token="true"/> 
+            <Number name="Type13" value="DC" size="8" token="true"/>
+            <Number name="Type14" value="DD" size="8" token="true"/> 
+            <Number name="Type15" value="DE" size="8" token="true"/>
+            <Number name="Type16" value="DF" size="8" token="true"/>          
+        </Choice>
+        <Block name="EventData">
+            <Number name="Pressure" size="8"/>
+        </Block>
+    </DataModel>
+
+    <DataModel name="PitchBendEvent" ref="Event">
+        <Choice name="EventMajorType">
+            <Number name="Type1" value="E0" size="8" token="true"/>
+            <Number name="Type2" value="E1" size="8" token="true"/> 
+            <Number name="Type3" value="E2" size="8" token="true"/>
+            <Number name="Type4" value="E3" size="8" token="true"/> 
+            <Number name="Type5" value="E4" size="8" token="true"/>
+            <Number name="Type6" value="E5" size="8" token="true"/> 
+            <Number name="Type7" value="E6" size="8" token="true"/>
+            <Number name="Type8" value="E7" size="8" token="true"/> 
+            <Number name="Type9" value="E8" size="8" token="true"/>
+            <Number name="Type10" value="E9" size="8" token="true"/> 
+            <Number name="Type11" value="EA" size="8" token="true"/>
+            <Number name="Type12" value="EB" size="8" token="true"/> 
+            <Number name="Type13" value="EC" size="8" token="true"/>
+            <Number name="Type14" value="ED" size="8" token="true"/> 
+            <Number name="Type15" value="EE" size="8" token="true"/>
+            <Number name="Type16" value="EF" size="8" token="true"/>           
+        </Choice>
+        <Block name="EventData">
+            <Number name="Lsb" size="8"/>
+            <Number name="Msb" size="8"/>
+        </Block>
+    </DataModel>
+
+    <DataModel name="NoteOnEvent" ref="Event">
+        <Choice name="EventMajorType">
+            <Number name="Type1" value="90" size="8" token="true"/>
+            <Number name="Type2" value="91" size="8" token="true"/> 
+            <Number name="Type3" value="92" size="8" token="true"/>
+            <Number name="Type4" value="93" size="8" token="true"/> 
+            <Number name="Type5" value="94" size="8" token="true"/>
+            <Number name="Type6" value="95" size="8" token="true"/> 
+            <Number name="Type7" value="96" size="8" token="true"/>
+            <Number name="Type8" value="97" size="8" token="true"/> 
+            <Number name="Type9" value="98" size="8" token="true"/>
+            <Number name="Type10" value="99" size="8" token="true"/> 
+            <Number name="Type11" value="9A" size="8" token="true"/>
+            <Number name="Type12" value="9B" size="8" token="true"/> 
+            <Number name="Type13" value="9C" size="8" token="true"/>
+            <Number name="Type14" value="9D" size="8" token="true"/> 
+            <Number name="Type15" value="9E" size="8" token="true"/>
+            <Number name="Type16" value="9F" size="8" token="true"/>           
+        </Choice>
+        <Block name="EventData">
+            <Number name="Note" size="8"/>
+            <Number name="Velocity" size="8"/>
+        </Block>
+    </DataModel>
+
+    <DataModel name="NoteOffEvent" ref="Event">
+        <Choice name="EventMajorType">
+            <Number name="Type1" value="80" size="8" token="true"/>
+            <Number name="Type2" value="81" size="8" token="true"/> 
+            <Number name="Type3" value="82" size="8" token="true"/>
+            <Number name="Type4" value="83" size="8" token="true"/> 
+            <Number name="Type5" value="84" size="8" token="true"/>
+            <Number name="Type6" value="85" size="8" token="true"/> 
+            <Number name="Type7" value="86" size="8" token="true"/>
+            <Number name="Type8" value="87" size="8" token="true"/> 
+            <Number name="Type9" value="88" size="8" token="true"/>
+            <Number name="Type10" value="89" size="8" token="true"/> 
+            <Number name="Type11" value="8A" size="8" token="true"/>
+            <Number name="Type12" value="8B" size="8" token="true"/> 
+            <Number name="Type13" value="8C" size="8" token="true"/>
+            <Number name="Type14" value="8D" size="8" token="true"/> 
+            <Number name="Type15" value="8E" size="8" token="true"/>
+            <Number name="Type16" value="8F" size="8" token="true"/>           
+        </Choice>
+        <Block name="EventData">
+            <Number name="Note" size="8"/>
+            <Number name="Velocity" size="8"/>
+        </Block>
+    </DataModel>
+
+    <DataModel name="NotePressureEvent" ref="Event">
+        <Choice name="EventMajorType">
+            <Number name="Type1" value="A0" size="8" token="true"/>
+            <Number name="Type2" value="A1" size="8" token="true"/> 
+            <Number name="Type3" value="A2" size="8" token="true"/>
+            <Number name="Type4" value="A3" size="8" token="true"/> 
+            <Number name="Type5" value="A4" size="8" token="true"/>
+            <Number name="Type6" value="A5" size="8" token="true"/> 
+            <Number name="Type7" value="A6" size="8" token="true"/>
+            <Number name="Type8" value="A7" size="8" token="true"/> 
+            <Number name="Type9" value="A8" size="8" token="true"/>
+            <Number name="Type10" value="A9" size="8" token="true"/> 
+            <Number name="Type11" value="AA" size="8" token="true"/>
+            <Number name="Type12" value="AB" size="8" token="true"/> 
+            <Number name="Type13" value="AC" size="8" token="true"/>
+            <Number name="Type14" value="AD" size="8" token="true"/> 
+            <Number name="Type15" value="AE" size="8" token="true"/>
+            <Number name="Type16" value="AF" size="8" token="true"/>            
+        </Choice>
+        <Block name="EventData">
+            <Number name="Note" size="8"/>
+            <Number name="Pressure" size="8"/>
+        </Block>
+    </DataModel>
+
+    <DataModel name="SysexEvent" ref="Event">
+        <Choice name="EventMajorType">
+            <Number name="Type1" value="F0" size="8" token="true"/>
+            <Number name="Type2" value="F7" size="8" token="true"/>
+        </Choice>
+        <Block name="EventData">
+            <Number name="Length" size="8">
+                <Relation type="size" of="Data" />
+            </Number>
+            <Blob name="Data" />
+        </Block>
+    </DataModel>
+
+    <DataModel name="Message">
+        <Choice name="DeltaTimeChoice">
+            <Number name="DeltaTime1Byte" size="8"/>
+            <Number name="DeltaTime2Byte" size="16"/>
+            <Number name="DeltaTime3Byte" size="24"/>
+            <Number name="DeltaTime4Byte" size="32"/>
+        </Choice>
+        <Choice name="EventsChoice">
+            <Block name="RefMetaEvent" ref="MetaEvent"/>
+            <Block name="RefControllerEvent" ref="ControllerEvent"/>
+            <Block name="RefProgramEvent" ref="ProgramEvent"/>
+            <Block name="RefNoteOnEvent" ref="NoteOnEvent"/>
+            <Block name="RefNoteOffEvent" ref="NoteOffEvent"/>
+            <Block name="RefNotePressureEvent" ref="NotePressureEvent"/>
+            <Block name="RefChannelPressureEvent" ref="ChannelPressureEvent"/>
+            <Block name="RefPitchBendEvent" ref="PitchBendEvent"/>
+            <Block name="RefSysexEvent" ref="SysexEvent"/>
+            <Block name="BaseEvent" ref="Event"/>
+        </Choice>
+    </DataModel>
+
+    <DataModel name="TrackChunk">
+        <String name="Type" value="MTrk" length="4" token="true" />
+        <Number name="Length" size="32">
+            <Relation type="size" of="Messages" />
+        </Number>
+        <Block name="Messages" ref="Message" maxOccurs="10000"/>
+    </DataModel>
+
+    <DataModel name="Mid">
+        <Block name="HeaderChunk">
+            <String name="Type" value="MThd" length="4" token="true" /> 
+            <Number name="Length" size="32"/>
+            <Choice name="Format">
+                <Number name="SingleTrack" value="00 00" size="16"/>
+                <Number name="MultipleTrack" value="00 01" size="16"/>
+                <Number name="MultipleSong" value="00 02" size="16"/>
+            </Choice>
+            <Number name="TrackCount" size="16">
+                <Relation type="count" of="Tracks" />
+            </Number>
+            <Number name="Division" size="16"/>
+        </Block>
+        <Block name="Tracks" maxOccurs="10000" ref="TrackChunk"/>        
+    </DataModel>
+
+    <StateModel name="TheState" initialState="Initial">
+        <State name="Initial">
+
+            <!-- Write out our midi file -->
+            <Action type="output">
+                <DataModel ref="Mid"/>
+                <!-- This is our sample file to read in -->
+                <Data fileName="/dev/null"/>
+            </Action>
+
+            <Action type="close"/>         
+        </State>
+    </StateModel>      
+
+    <Test name="Default">        
+        <StateModel ref="TheState"/>
+
+        <Publisher class="File">
+            <Param name="FileName" value="repaired"/>
+        </Publisher>
+
+        <Logger class="Filesystem">
+            <Param name="Path" value="logs" />
+        </Logger>
+    </Test>        
+</Peach>
+<!-- end -->

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Based on this tutorial: http://community.peachfuzzer.com/v3/TutorialFileFuzzing/CreateDataModel.html-->
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd">
+	<Defaults>
+        <Number signed="false" />
+    </Defaults>
+
+    <DataModel name="Chunk">
+        <String name="ID" length="4" padCharacter=" " />
+        <Number name="Size" size="32" >
+            <Relation type="size" of="Data" />
+        </Number>
+        <Blob name="Data" />
+        <Padding alignment="16" />
+    </DataModel>       
+    
+    <DataModel name="ChunkVP8L" ref="Chunk">
+        <String name="ID" length="4" value="VP8L" token="true" />
+    </DataModel>  
+
+
+    <DataModel name="Webp">
+        <String name="Signature" value="RIFF" token="true" />
+        <Number name="Number" size="32" />
+        <String name="Webp" value="WEBP" token="true"/>
+
+        <Choice name="Chunks" maxOccurs="30000">
+            <Block name="VP8L" ref="ChunkVP8L"/>
+            <Block name="OtherChunk" ref="Chunk"/>
+        </Choice>
+    </DataModel>
+
+    <StateModel name="TheState" initialState="Initial">
+        <State name="Initial">
+
+            <!-- Write to file -->
+            <Action type="output">
+                <DataModel ref="Webp"/>
+                <!-- This is our sample file to read in -->
+                <Data fileName="/dev/null"/>
+            </Action>
+
+            <Action type="close"/>
+
+        </State>
+    </StateModel>
+
+    <Test name="Default">
+        <StateModel ref="TheState"/>
+
+        <Publisher class="File">
+            <Param name="FileName" value="repaired"/>
+        </Publisher>
+
+        <Logger class="Filesystem">
+            <Param name="Path" value="logs" />
+        </Logger>
+    </Test>
+
+        
+</Peach>
+<!-- end -->
