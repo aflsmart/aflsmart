@@ -72,7 +72,7 @@
 		<Block name="strf_chunk" ref="CHUNK_strf" minOccurs="1" maxOccurs="1"/>
 		<Block name="strd_chunk" ref="CHUNK_strd" minOccurs="0" maxOccurs="1"/>
 		<Block name="strn_chunk" ref="CHUNK_strn" minOccurs="0" maxOccurs="1"/>
-                <Block name="junk_chunk" ref="CHUNK_junk" minOccurs="0" maxOccurs="1"/>
+    <Block name="junk_chunk" ref="CHUNK_junk" minOccurs="0" maxOccurs="1"/>
 	</Block>
     </DataModel>
 

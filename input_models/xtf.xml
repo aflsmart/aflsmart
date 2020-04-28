@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Based on this tutorial: http://community.peachfuzzer.com/v3/TutorialFileFuzzing/CreateDataModel.html-->
+<!--This peach pit can be used for both True Type Font and Open Type Font-->
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd">
+	  <Defaults>
+        <Number signed="false" />
+    </Defaults>
+
+    <DataModel name="TableRecord">
+        <Blob name="Data" length="16"/>
+    </DataModel>       
+    
+    <DataModel name="XTF">
+        <Number name="version" size="32" />
+        <Number name="numTables" size="16" endian="big">
+          <Relation type="count" of="tableRecords" />
+        </Number>
+        <Number name="searchRange" size="16" />
+        <Number name="entrySelector" size="16" />
+        <Number name="rangeShift" size="16" />
+        <Block name="tableRecords" ref="TableRecord" maxOccurs="1000"/>
+        <Blob name="tables" />
+    </DataModel>
+
+    <StateModel name="TheState" initialState="Initial">
+        <State name="Initial">
+
+            <!-- Write to file -->
+            <Action type="output">
+                <DataModel ref="XTF"/>
+                <!-- This is our sample file to read in -->
+                <Data fileName="/dev/null"/>
+            </Action>
+
+            <Action type="close"/>
+
+        </State>
+    </StateModel>
+
+    <Test name="Default">
+        <StateModel ref="TheState"/>
+
+        <Publisher class="File">
+            <Param name="FileName" value="repaired"/>
+        </Publisher>
+
+        <Logger class="Filesystem">
+            <Param name="Path" value="logs" />
+        </Logger>
+    </Test>
+
+        
+</Peach>
+<!-- end -->
