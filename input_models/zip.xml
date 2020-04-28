@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd">
+    <Defaults>
+        <Number signed="false" valueType="hex"/>
+    </Defaults>
+    
+    <DataModel name="LocalFileHeader">
+        <Number name="Signature" value="50 4B 03 04" size="32" token="true"/>
+        <Number name="Version" size="16"/>
+        <Number name="Flag" size="16"/>
+        <Number name="CompressionMethod" size="16"/>
+        <Number name="LastModificationTime" size="16"/>
+        <Number name="LastModificationDate" size="16"/>
+        <Number name="CRC" size="32"/>
+        <Number name="CompressedSize" size="32">
+          <Relation type="size" of="Data" />
+        </Number>
+        <Number name="UncompressedSize" size="32"/>
+        <Number name="FileNameLength" size="16">
+          <Relation type="size" of="FileName" />
+        </Number>
+        <Number name="ExtraFieldLength" size="16">
+          <Relation type="size" of="ExtraField" />
+        </Number>
+        <String name="FileName"/>
+        <Blob name="ExtraField"/>
+        <Blob name="Data"/>
+    </DataModel>
+
+    <DataModel name="CentralDirectoryFileHeader">
+        <Number name="Signature" value="50 4B 01 02" size="32" token="true"/>
+        <Number name="VersionMade" size="16"/>
+        <Number name="VersionExtract" size="16"/>
+        <Number name="Flag" size="16"/>
+        <Number name="CompressionMethod" size="16"/>
+        <Number name="LastModificationTime" size="16"/>
+        <Number name="LastModificationDate" size="16"/>
+        <Number name="CRC" size="32"/>
+        <Number name="CompressedSize" size="32"/>
+        <Number name="UncompressedSize" size="32"/>
+        <Number name="FileNameLength" size="16">
+          <Relation type="size" of="FileName" />
+        </Number>
+        <Number name="ExtraFieldLength" size="16">
+          <Relation type="size" of="ExtraField" />
+        </Number>
+        <Number name="FileCommentLength" size="16">
+          <Relation type="size" of="FileComment" />
+        </Number>
+        <Number name="DiskNumberStart" size="16"/>
+        <Number name="InternalFileAttributes" size="16"/>
+        <Number name="ExternalFileAttributes" size="32"/>
+        <Number name="RelativeOffset" size="32"/>
+        <String name="FileName"/>
+        <Blob name="ExtraField"/>
+        <Blob name="FileComment"/>
+    </DataModel>
+
+    <DataModel name="EndOfCentralDirectoryRecord">
+        <Number name="Signature" value="50 4B 05 06" size="32" token="true"/>
+        <Number name="DiskNumber" size="16"/>
+        <Number name="DiskStart" size="16"/>
+        <Number name="RecordsOnDisk" size="16"/>
+        <Number name="TotalDirectoryRecords" size="16"/>
+        <Number name="CentralDirectorySize" size="32"/>
+        <Number name="CentralDirectoryOffset" size="32"/>
+        <Number name="CommentLength" size="16">
+          <Relation type="size" of="Comment" />
+        </Number>
+        <Blob name="Comment"/>
+    </DataModel>
+
+
+    <DataModel name="Zip">
+      <Block name="LocalFileHeaders" ref="LocalFileHeader" maxOccurs="10000"/>
+      <Block name="CentralDirectoryFileHeaders" ref="CentralDirectoryFileHeader" maxOccurs="10000"/>
+      <Block name="EOCD" ref="EndOfCentralDirectoryRecord"/>
+    </DataModel>
+
+    <StateModel name="TheState" initialState="Initial">
+        <State name="Initial">
+            <Action type="output">
+                <DataModel ref="Zip"/>
+                <Data fileName="/dev/null"/>
+            </Action>
+
+            <Action type="close"/>         
+        </State>
+    </StateModel>      
+
+    <Test name="Default">        
+        <StateModel ref="TheState"/>
+
+        <Publisher class="File">
+            <Param name="FileName" value="repaired"/>
+        </Publisher>
+
+        <Logger class="Filesystem">
+            <Param name="Path" value="logs" />
+        </Logger>
+    </Test>        
+</Peach>
+<!-- end -->
