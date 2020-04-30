@@ -42,6 +42,30 @@ sudo apt install gcc-4.4
 sudo apt install g++-4.4
 ```
 
+If you find that it just didn't work on your linux distribution and got failed at installing gcc/g++ 4.4 follow the commands below :
+
+First edit the sources.list file :
+
+```bash
+sudo vim /etc/apt/sources.list
+```
+then add the following line to your sources.list file :
+
+```bash
+deb  http://dk.archive.ubuntu.com/ubuntu/  trusty  main  universe
+```
+
+Now :
+
+```bash
+sudo apt-get update
+sudo apt install gcc-4.4
+sudo apt install g++-4.4
+```
+
+(This should work on many distributions without any failure)
+
+
 ## AFLSmart
 
 Download AFLSmart and compile it.
