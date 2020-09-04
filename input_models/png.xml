@@ -213,7 +213,7 @@
         <StateModel ref="TheState"/>
 
         <Publisher class="File">
-            <Param name="FileName" value="repaired.png"/>
+            <Param name="FileName" value="repaired"/>
         </Publisher>
 
         <Logger class="Filesystem">

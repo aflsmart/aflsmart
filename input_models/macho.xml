@@ -43,8 +43,8 @@
         <Block name="Header64" ref="MACHO_HEADER_64" />
         <Block name="Header32" ref="MACHO_HEADER_32" />
       </Choice>
-      <Block name="Commands" ref="LOAD_COMMAND" maxOccurs="32" />
-      <Blob name="date"/> 
+      <Block name="Commands" ref="LOAD_COMMAND" maxOccurs="1000" />
+      <Blob name="data"/> 
     </DataModel>
     
 
