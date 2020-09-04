@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd">
+	  <Defaults>
+        <Number signed="false" />
+    </Defaults>
+
+    <DataModel name="MACHO_HEADER_64">
+      <Blob name="magic" valueType="hex" value="CF FA ED FE" token="true" />
+      <Number name="cpu_type" size="32" />
+      <Number name="cpu_sub_type" size="32" />
+      <Number name="file_type" size="32" />
+      <Number name="commands_count" size="32" >
+        <Relation type="count" of="Commands" />
+      </Number>
+      <Blob name="others" length="12" />
+    </DataModel>
+
+    <DataModel name="MACHO_HEADER_32">
+      <Blob name="magic" valueType="hex" value="CE FA ED FE" token="true" />
+      <Number name="cpu_type" size="32" />
+      <Number name="cpu_sub_type" size="32" />
+      <Number name="file_type" size="32" />
+      <Number name="commands_count" size="32" >
+        <Relation type="count" of="Commands" />
+      </Number>
+      <Blob name="others" length="8" />
+    </DataModel>
+
+    <DataModel name="LOAD_COMMAND">
+      <Block name="LoadCommand">
+        <Number name="type" size="32" />
+        <Number name="size" size="32" >
+          <Relation type="size" of="LoadCommand" />
+        </Number>
+        <Blob name="data" />
+      </Block>
+    </DataModel>
+
+
+    <DataModel name="MACHO">
+      <Choice name="Headers" maxOccurs="1">
+        <Block name="Header64" ref="MACHO_HEADER_64" />
+        <Block name="Header32" ref="MACHO_HEADER_32" />
+      </Choice>
+      <Block name="Commands" ref="LOAD_COMMAND" maxOccurs="32" />
+      <Blob name="date"/> 
+    </DataModel>
+    
+
+    <StateModel name="TheState" initialState="Initial">
+        <State name="Initial">
+
+            <!-- Write out our elf file -->
+            <Action type="output">
+                <DataModel ref="MACHO"/>
+                <!-- This is our sample file to read in -->
+                <Data fileName="/dev/null"/>
+            </Action>
+
+            <Action type="close"/>           
+        </State>
+    </StateModel>   
+
+    <Test name="Default">
+        <StateModel ref="TheState"/>
+
+        <Publisher class="File">
+            <Param name="FileName" value="repaired"/>
+        </Publisher>
+
+        <Logger class="Filesystem">
+            <Param name="Path" value="logs" />
+        </Logger>
+    </Test>
+
+        
+</Peach>
+<!-- end -->

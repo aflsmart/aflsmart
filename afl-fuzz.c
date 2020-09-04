@@ -233,6 +233,8 @@ static u8 model_type,                 /* Input Model Type - PEACH */
 static u64 parsed_inputs;             /* Number of inputs parsed for      */
                                       /* validity so far                  */
 
+static u8 composite_mode = 0;         /* This mode is enabled with the -c option */
+
 #ifdef HAVE_AFFINITY
 
 static s32 cpu_aff = -1;              /* Selected CPU core                */
@@ -5230,6 +5232,7 @@ void linearize_chunks(struct chunk *c, struct chunk ***first_chunks_arr,
                                                sizeof(struct chunk *));
   if (model_type == MODEL_PEACH) {
     first_level = 1;
+    if (composite_mode) first_level += 2;
   } 
 
   second_level = first_level + 1;
@@ -8130,6 +8133,7 @@ static void usage(u8* argv0) {
 
        "  -w model_type - type of input model - only peach is supported now \n"
        "  -g input_model- path to input model file \n"
+       "  -c            - composite mode for programs accepting multiple file formats (e.g., bloaty)\n"
        "  -h            - mix higher-order mutations with other mutations\n"
        "  -l            - log input model mutations in log/<pid>.log of the output directory\n"
        "  -H number     - Apply a maximum on the number of higher-order mutations\n\n"
@@ -8806,7 +8810,7 @@ int main(int argc, char **argv) {
   gettimeofday(&tv, &tz);
   srandom(tv.tv_sec ^ tv.tv_usec ^ getpid());
 
-  while ((opt = getopt(argc, argv, "+i:o:f:m:t:T:dnCB:S:M:x:Qw:g:lhH:e:")) > 0)
+  while ((opt = getopt(argc, argv, "+i:o:f:m:t:T:dnCB:S:M:x:Qw:g:lhH:e:c")) > 0)
 
     switch (opt) {
 
@@ -9030,6 +9034,13 @@ int main(int argc, char **argv) {
         if (file_extension) FATAL("Multiple -e options not supported");
 
         file_extension = optarg;
+
+        break;
+
+      case 'c':
+
+        if (composite_mode) FATAL("Multiple -Q options not supported");
+        composite_mode = 1;
 
         break;
 

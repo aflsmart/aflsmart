@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd">
+  <!-- This composite pit is used to test Bloaty McBloatface (https://github.com/google/bloaty) -->
+  <!-- The src file paths are fixed for Google FuzzBench AFLSmart setup. Please update them if needed -->
+  <Include ns="binary_elf" src="file:/out/elf.xml" />
+  <Include ns="binary_macho" src="file:/out/macho.xml" />
+
+    <DataModel name="Composite">     
+        <Choice name="BinaryFormats" maxOccurs="1">
+            <Block name="Elf" ref="binary_elf:ELF"/>
+            <Block name="MachO" ref="binary_macho:MACHO"/>      
+        </Choice>        
+    </DataModel>
+
+    <StateModel name="TheState" initialState="Initial">
+        <State name="Initial">
+
+            <!-- Write out our wave file -->
+            <Action type="output">
+                <DataModel ref="Composite"/>
+                <!-- This is our sample file to read in -->
+                <Data fileName="/dev/null"/>
+            </Action>
+
+            <Action type="close"/>           
+        </State>
+    </StateModel>   
+
+    <Test name="Default">
+        <StateModel ref="TheState"/>
+
+        <Publisher class="File">
+            <Param name="FileName" value="repaired"/>
+        </Publisher>
+
+        <Logger class="Filesystem">
+            <Param name="Path" value="logs" />
+        </Logger>
+    </Test>
+
+        
+</Peach>
