@@ -52,7 +52,7 @@ sudo vim /etc/apt/sources.list
 then add the following line to your sources.list file :
 
 ```bash
-deb  http://dk.archive.ubuntu.com/ubuntu/  trusty  main  universe
+deb http://dk.archive.ubuntu.com/ubuntu/ trusty main universe
 ```
 
 Now :
